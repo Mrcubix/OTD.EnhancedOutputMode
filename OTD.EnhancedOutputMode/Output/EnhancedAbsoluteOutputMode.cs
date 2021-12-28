@@ -9,6 +9,7 @@ using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
 using OTD.EnhancedOutputMode.Interface;
 using OTD.EnhancedOutputMode.Tablet;
+using OTD.EnhancedOutputMode.Tool;
 
 namespace OTD.EnhancedOutputMode.Output
 {
@@ -22,6 +23,8 @@ namespace OTD.EnhancedOutputMode.Output
         {
             if (report is ITouchReport touchReport)
             {
+                if (!TouchToggle.istouchToggled) return;
+                 
                 TouchConvertedReport touchConvertedReport = new TouchConvertedReport(report, lastPos);
 
                 lastPos = touchConvertedReport.Position;
