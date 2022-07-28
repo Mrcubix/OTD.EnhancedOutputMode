@@ -10,6 +10,8 @@ using OTD.EnhancedOutputMode.Interface;
 using OTD.EnhancedOutputMode.Tablet;
 using OTD.EnhancedOutputMode.Pointer;
 using OTD.EnhancedOutputMode.Tool;
+using System.Collections.Generic;
+using System;
 
 namespace OTD.EnhancedOutputMode.Output
 {
@@ -18,9 +20,23 @@ namespace OTD.EnhancedOutputMode.Output
     {
         private readonly VMultiRelativePointer pointer = new();
         public override IRelativePointer Pointer => pointer;
+        private IEnumerable<IGateFilter> gateFilters = Array.Empty<IGateFilter>();
+        public IEnumerable<IGateFilter> GateFilters
+        {
+            set => gateFilters = Filters.OfType<IGateFilter>();
+            get => this.gateFilters;
+        }
+        public bool firstReport = true;
         public Vector2 lastPos;
+        
         public override void Read(IDeviceReport report)
         {
+            if (firstReport)
+            {
+                firstReport = false;
+                GateFilters = Filters.OfType<IGateFilter>().ToList();
+            }
+
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;
@@ -53,7 +69,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         private bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
         {
-            foreach (var gateFilter in Filters.OfType<IGateFilter>())
+            foreach (var gateFilter in this.GateFilters)
                 if (!gateFilter.Pass(report, ref tabletreport))
                     return false;
                     

@@ -1,15 +1,14 @@
 using System.Numerics;
+using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Tablet;
 using OTD.EnhancedOutputMode.Interface;
 
 namespace yep
 {
+    [PluginName("Example IGateFilter")]
     public class SomeFilter : IFilter, IGateFilter
     {
-        public Vector2 Filter(Vector2 input) 
-        {
-            return input;
-        }
+        public Vector2 Filter(Vector2 input) => input;
 
         public bool Pass(IDeviceReport report, ref ITabletReport tabletreport)
         {

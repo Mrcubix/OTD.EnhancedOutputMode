@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using OpenTabletDriver.Desktop.Interop;
@@ -17,10 +19,23 @@ namespace OTD.EnhancedOutputMode.Output
     public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerOutputMode<IAbsolutePointer>
     {
         public override IAbsolutePointer Pointer => SystemInterop.AbsolutePointer;
+        private IList<IGateFilter> gateFilters = Array.Empty<IGateFilter>();
+        public IList<IGateFilter> GateFilters
+        {
+            set => gateFilters = value ?? Array.Empty<IGateFilter>();
+            get => this.gateFilters;
+        }
+        public bool firstReport = true;
         public Vector2 lastPos;
         
         public override void Read(IDeviceReport report)
         {
+            if (firstReport)
+            {
+                firstReport = false;
+                GateFilters = Filters.OfType<IGateFilter>().ToList();
+            }
+
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;
@@ -53,7 +68,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         private bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
         {
-            foreach (var gateFilter in Filters.OfType<IGateFilter>())
+            foreach (var gateFilter in this.GateFilters)
                 if (!gateFilter.Pass(report, ref tabletreport))
                     return false;
                     
