@@ -1,8 +1,5 @@
-using System;
-using System.Threading.Tasks;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
-using OpenTabletDriver.Plugin.Tablet;
 
 namespace OTD.EnhancedOutputMode.Tool
 {

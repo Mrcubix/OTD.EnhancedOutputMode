@@ -4,3 +4,6 @@
 [submodule ".modules/VoiDPlugins"]
 	path = .modules/VoiDPlugins
 	url = https://github.com/X9VoiD/VoiDPlugins.git
+[submodule ".modules/HIDSharpCore"]
+	path = .modules/HIDSharpCore
+	url = https://github.com/InfinityGhost/HIDSharpCore.git
