@@ -14,7 +14,7 @@ using OTD.EnhancedOutputMode.Tool;
 namespace OTD.EnhancedOutputMode.Output
 {
     [PluginName("Enhanced Absolute Mode")]
-    public class EnhancedAbsoluteOutputMode : AbsoluteOuputMode, IPointerOutputMode<IAbsolutePointer>
+    public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerOutputMode<IAbsolutePointer>
     {
         public override IAbsolutePointer Pointer => SystemInterop.AbsolutePointer;
         public Vector2 lastPos;
