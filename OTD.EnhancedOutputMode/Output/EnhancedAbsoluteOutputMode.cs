@@ -37,8 +37,6 @@ namespace OTD.EnhancedOutputMode.Output
 
         public override void Read(IDeviceReport report)
         {
-            Log.Write("EnhancedAbsoluteOutputMode", $"Report: {report}", LogLevel.Debug);
-
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;
