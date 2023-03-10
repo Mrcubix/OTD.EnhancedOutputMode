@@ -20,23 +20,19 @@ namespace OTD.EnhancedOutputMode.Output
     {
         public override IAbsolutePointer Pointer => SystemInterop.AbsolutePointer;
 
-        private IList<IFilter> _filters = new List<IFilter>();
-        public new IList<IFilter> Filters
-        {
-            set
-            {
-                _filters = value;
-                GateFilters = value.OfType<IGateFilter>().ToList();
-            }
-            get => _filters;
-        }
-
         public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public Vector2 lastPos;
+        public bool firstReport = true;
 
 
         public override void Read(IDeviceReport report)
         {
+            if (firstReport)
+            {
+                GateFilters = Filters.OfType<IGateFilter>().ToList();
+                firstReport = false;
+            }
+
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;
