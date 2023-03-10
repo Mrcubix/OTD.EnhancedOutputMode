@@ -9,7 +9,7 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
-using OTD.EnhancedOutputMode.Interface;
+using OTD.EnhancedOutputMode.Lib.Interface;
 using OTD.EnhancedOutputMode.Tablet;
 using OTD.EnhancedOutputMode.Tool;
 
@@ -34,7 +34,23 @@ namespace OTD.EnhancedOutputMode.Output
             {
                 firstReport = false;
                 GateFilters = Filters.OfType<IGateFilter>().ToList();
+
+                Log.Write("EnhancedAbsoluteOutputMode", $"GateFilters: {GateFilters.Count}", LogLevel.Debug);
+                
+                var filters = Filters.OfType<IFilter>().ToList();
+
+                foreach(var filter in filters)
+                {
+                    // print types & implented interfaces
+                    Log.Write("EnhancedAbsoluteOutputMode", $"Filter: {filter.GetType().Name}", LogLevel.Debug);
+                    foreach(var i in filter.GetType().GetInterfaces())
+                    {
+                        Log.Write("EnhancedAbsoluteOutputMode", $"Interface: {i.Name}", LogLevel.Debug);
+                    }
+                }
             }
+
+            Log.Write("EnhancedAbsoluteOutputMode", $"Report: {report.GetType().Name}", LogLevel.Debug);
 
             if (report is ITouchReport touchReport)
             {
