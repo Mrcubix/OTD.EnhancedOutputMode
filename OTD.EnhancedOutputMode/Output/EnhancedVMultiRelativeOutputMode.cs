@@ -20,23 +20,22 @@ namespace OTD.EnhancedOutputMode.Output
     {
         private readonly VMultiRelativePointer pointer = new();
         public override IRelativePointer Pointer => pointer;
-        private IEnumerable<IGateFilter> gateFilters = Array.Empty<IGateFilter>();
-        public IEnumerable<IGateFilter> GateFilters
+        private IList<IFilter> _filters = new List<IFilter>();
+        public new IList<IFilter> Filters
         {
-            set => gateFilters = Filters.OfType<IGateFilter>();
-            get => this.gateFilters;
+            set
+            {
+                _filters = value;
+                GateFilters = value.OfType<IGateFilter>().ToList();
+            }
+            get => _filters;
         }
-        public bool firstReport = true;
+
+        public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public Vector2 lastPos;
         
         public override void Read(IDeviceReport report)
         {
-            if (firstReport)
-            {
-                firstReport = false;
-                GateFilters = Filters.OfType<IGateFilter>().ToList();
-            }
-
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;

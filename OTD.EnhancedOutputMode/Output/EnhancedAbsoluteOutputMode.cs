@@ -19,43 +19,30 @@ namespace OTD.EnhancedOutputMode.Output
     public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerOutputMode<IAbsolutePointer>
     {
         public override IAbsolutePointer Pointer => SystemInterop.AbsolutePointer;
-        private IList<IGateFilter> gateFilters = Array.Empty<IGateFilter>();
-        public IList<IGateFilter> GateFilters
+
+        private IList<IFilter> _filters = new List<IFilter>();
+        public new IList<IFilter> Filters
         {
-            set => gateFilters = value ?? Array.Empty<IGateFilter>();
-            get => this.gateFilters;
+            set
+            {
+                _filters = value;
+                GateFilters = value.OfType<IGateFilter>().ToList();
+            }
+            get => _filters;
         }
-        public bool firstReport = true;
+
+        public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public Vector2 lastPos;
-        
+
+
         public override void Read(IDeviceReport report)
         {
-            if (firstReport)
-            {
-                firstReport = false;
-                GateFilters = Filters.OfType<IGateFilter>().ToList();
-
-                Log.Write("EnhancedAbsoluteOutputMode", $"GateFilters: {GateFilters.Count}", LogLevel.Debug);
-                
-                var filters = Filters.OfType<IFilter>().ToList();
-
-                foreach(var filter in filters)
-                {
-                    // print types & implented interfaces
-                    Log.Write("EnhancedAbsoluteOutputMode", $"Filter: {filter.GetType().Name}", LogLevel.Debug);
-                    foreach(var i in filter.GetType().GetInterfaces())
-                    {
-                        Log.Write("EnhancedAbsoluteOutputMode", $"Interface: {i.Name}", LogLevel.Debug);
-                    }
-                }
-            }
-
-            Log.Write("EnhancedAbsoluteOutputMode", $"Report: {report.GetType().Name}", LogLevel.Debug);
+            Log.Write("EnhancedAbsoluteOutputMode", $"Report: {report}", LogLevel.Debug);
 
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;
-                 
+
                 TouchConvertedReport touchConvertedReport = new TouchConvertedReport(report, lastPos);
 
                 lastPos = touchConvertedReport.Position;
@@ -87,7 +74,7 @@ namespace OTD.EnhancedOutputMode.Output
             foreach (var gateFilter in this.GateFilters)
                 if (!gateFilter.Pass(report, ref tabletreport))
                     return false;
-                    
+
             return true;
         }
     }
