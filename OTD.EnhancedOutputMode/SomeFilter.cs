@@ -1,7 +1,7 @@
 using System.Numerics;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Tablet;
-using OTD.EnhancedOutputMode.Interface;
+using OTD.EnhancedOutputMode.Lib.Interface;
 
 namespace yep
 {

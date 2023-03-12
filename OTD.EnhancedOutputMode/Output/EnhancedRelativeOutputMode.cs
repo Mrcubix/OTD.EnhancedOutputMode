@@ -9,7 +9,7 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
-using OTD.EnhancedOutputMode.Interface;
+using OTD.EnhancedOutputMode.Lib.Interface;
 using OTD.EnhancedOutputMode.Tablet;
 using OTD.EnhancedOutputMode.Tool;
 

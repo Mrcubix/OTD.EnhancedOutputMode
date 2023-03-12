@@ -1,17 +1,16 @@
 using System.Linq;
 using System.Numerics;
-using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
-using OTD.EnhancedOutputMode.Interface;
 using OTD.EnhancedOutputMode.Tablet;
 using OTD.EnhancedOutputMode.Pointer;
 using OTD.EnhancedOutputMode.Tool;
 using System.Collections.Generic;
 using System;
+using OTD.EnhancedOutputMode.Lib.Interface;
 
 namespace OTD.EnhancedOutputMode.Output
 {
