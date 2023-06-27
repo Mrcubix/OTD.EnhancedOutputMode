@@ -7,3 +7,6 @@
 [submodule ".modules/HIDSharpCore"]
 	path = .modules/HIDSharpCore
 	url = https://github.com/InfinityGhost/HIDSharpCore.git
+[submodule ".modules/OTD.Backport"]
+	path = .modules/OTD.Backport
+	url = git@github.com:Mrcubix/OTD.Backport.git

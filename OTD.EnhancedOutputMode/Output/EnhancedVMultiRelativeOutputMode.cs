@@ -21,6 +21,7 @@ namespace OTD.EnhancedOutputMode.Output
         public override IRelativePointer Pointer => pointer;
 
         public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
+        public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
         public Vector2 lastPos;
         public bool firstReport = true;
         
@@ -29,6 +30,7 @@ namespace OTD.EnhancedOutputMode.Output
             if (firstReport)
             {
                 GateFilters = Filters.OfType<IGateFilter>().ToList();
+                AuxFilters = Filters.OfType<IAuxFilter>().ToList();
                 firstReport = false;
             }
 
@@ -59,6 +61,11 @@ namespace OTD.EnhancedOutputMode.Output
                         Pointer.Translate(pos);
                     }
                 }
+            }
+            else if (report is IAuxReport auxReport)
+            {
+                foreach (var auxFilter in AuxFilters)
+                    auxReport = auxFilter.AuxFilter(auxReport);
             }
         }
 
