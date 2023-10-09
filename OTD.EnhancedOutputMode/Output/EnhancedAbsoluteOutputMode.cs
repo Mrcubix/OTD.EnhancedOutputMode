@@ -38,13 +38,16 @@ namespace OTD.EnhancedOutputMode.Output
             {
                 if (!TouchToggle.istouchToggled) return;
 
-                TouchConvertedReport touchConvertedReport = new TouchConvertedReport(report, lastPos);
+                ITabletReport touchConvertedReport = new TouchConvertedReport(touchReport, lastPos);
 
-                lastPos = touchConvertedReport.Position;
-
-                if (Transpose(touchConvertedReport) is Vector2 pos)
+                if (ShouldReport(report, ref touchConvertedReport))
                 {
-                    Pointer.SetPosition(pos);
+                    lastPos = touchConvertedReport.Position;
+
+                    if (Transpose(touchConvertedReport) is Vector2 pos)
+                    {
+                        Pointer.SetPosition(pos);
+                    }
                 }
             }
             else if (report is ITabletReport tabletReport)

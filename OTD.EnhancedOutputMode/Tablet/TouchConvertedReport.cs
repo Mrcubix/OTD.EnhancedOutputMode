@@ -15,37 +15,50 @@ namespace OTD.EnhancedOutputMode.Tablet
 
         public TouchConvertedReport(IDeviceReport report, Vector2 lastPos)
         {
-            this.Raw = report.Raw;
+            Raw = report.Raw;
+            ReportID = 1;
 
             if (report is ITouchReport touchreport)
             {
-                this.ReportID = 1;
-                
-                TouchPoint firstTouch = null;
-                foreach(TouchPoint point in touchreport.Touches)
-                    if ((firstTouch = point) != null)
-                        break;
-
-                if (firstTouch != null)
-                {
-                    this.Position = firstTouch.Position;
-                    this.Pressure = 1;
-                }
-                else
-                {
-                    this.Position = lastPos;
-                    this.Pressure = 0;
-                }
-
-                this.PenButtons = new bool[] {false};
+                Initialize(touchreport, lastPos);
             }
             else if (report is ITabletReport tabletreport)
             {
-                this.Position = tabletreport.Position;
-                this.Pressure = tabletreport.Pressure;
-                this.PenButtons = tabletreport.PenButtons;
+                Position = tabletreport.Position;
+                Pressure = tabletreport.Pressure;
+                PenButtons = tabletreport.PenButtons;
                 Log.Write("OTD.EnhancedOutputMode", "Report is ITabletReport when ITouchReport is expected.\nWarning occured in OpenTabletDriver.EnhancedOutputMode.Tablet.TouchConvertedReport", LogLevel.Warning);
             }
+        }
+
+        public TouchConvertedReport(ITouchReport report, Vector2 lastPos)
+        {
+            Raw = report.Raw;
+            ReportID = 1;
+            
+            Initialize(report, lastPos);
+        }
+
+        private void Initialize(ITouchReport touchReport, Vector2 lastPos)
+        {
+            TouchPoint firstTouch = null;
+
+            foreach(TouchPoint point in touchReport.Touches)
+                if ((firstTouch = point) != null)
+                    break;
+
+            if (firstTouch != null)
+            {
+                Position = firstTouch.Position;
+                Pressure = 1;
+            }
+            else
+            {
+                Position = lastPos;
+                Pressure = 0;
+            }
+
+            PenButtons = new bool[] {false};
         }
     }
 }
