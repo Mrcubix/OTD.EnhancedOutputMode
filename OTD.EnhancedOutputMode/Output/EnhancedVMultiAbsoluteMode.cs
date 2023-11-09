@@ -27,7 +27,7 @@ namespace OTD.EnhancedOutputMode.Output
         
         public override void Read(IDeviceReport report)
         {
-            if (firstReport)
+            if (firstReport && Filters != null)
             {
                 GateFilters = Filters.OfType<IGateFilter>().ToList();
                 AuxFilters = Filters.OfType<IAuxFilter>().ToList();
