@@ -23,32 +23,35 @@ namespace OTD.EnhancedOutputMode.Output
 
         public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
-        public Vector2 lastPos;
-        public bool firstReport = true;
+        private bool _firstReport = true;
+        private Vector2 _lastPos;
+        private int _lastTouchID = -1;
 
         public override void Read(IDeviceReport report)
         {
-            if (firstReport && Filters != null)
+            if (_firstReport && Filters != null)
             {
                 GateFilters = Filters.OfType<IGateFilter>().ToList();
                 AuxFilters = Filters.OfType<IAuxFilter>().ToList();
-                firstReport = false;
+                _firstReport = false;
             }
 
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;
 
-                ITabletReport touchConvertedReport = new TouchConvertedReport(report, lastPos);
+                ITabletReport touchConvertedReport = new TouchConvertedReport(report, _lastPos);
 
                 if (ShouldReport(report, ref touchConvertedReport))
                 {
-                    lastPos = touchConvertedReport.Position;
+                    _lastPos = touchConvertedReport.Position;
                     
-                    if (Transpose(touchConvertedReport) is Vector2 pos)
+                    if (Transpose(touchConvertedReport) is Vector2 pos && _lastTouchID == TouchConvertedReport.CurrentFirstTouchID)
                     {
                         Pointer.Translate(pos);
                     }
+
+                    _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
                 }
             }
             else if (report is ITabletReport tabletReport)
@@ -58,7 +61,7 @@ namespace OTD.EnhancedOutputMode.Output
                     if (Pointer is IVirtualTablet pressureHandler)
                         pressureHandler.SetPressure((float)tabletReport.Pressure / (float)Tablet.Digitizer.MaxPressure);
 
-                    lastPos = tabletReport.Position;
+                    _lastPos = tabletReport.Position;
 
                     if (Transpose(tabletReport) is Vector2 pos)
                     {
