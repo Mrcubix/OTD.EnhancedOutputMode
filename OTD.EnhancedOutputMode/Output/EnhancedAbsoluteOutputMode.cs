@@ -72,7 +72,7 @@ namespace OTD.EnhancedOutputMode.Output
             }
         }
 
-        private bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
+        protected bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
         {
             foreach (var gateFilter in this.GateFilters)
                 if (!gateFilter.Pass(report, ref tabletreport))
