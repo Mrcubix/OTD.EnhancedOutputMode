@@ -20,6 +20,6 @@ mv temp/VoiD.pdb build/VoiD.pdb
 
 cd ./build
 
-zip -r OTD.EnhancedOutputMode.zip *
+zip -r OTD.EnhancedOutputMode-0.6.x.zip *
 
 cd ..

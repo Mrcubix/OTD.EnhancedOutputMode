@@ -22,6 +22,6 @@ Move-Item temp/VMulti.pdb build/VMulti.pdb
 
 Set-Location ./build
 
-7z a -r OTD.EnhancedOutputMode.zip *
+7z a -r OTD.EnhancedOutputMode-0.6.x.zip *
 
 Set-Location ..
