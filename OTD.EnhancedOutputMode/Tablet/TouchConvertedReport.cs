@@ -10,7 +10,6 @@ namespace OTD.EnhancedOutputMode.Tablet
         public static int CurrentFirstTouchID { get; set; } = -1;
 
         public byte[] Raw { get; set; }
-        public uint ReportID { get; set; }
         public Vector2 Position { get; set; }
         public uint Pressure { get; set; }
         public bool[] PenButtons { get; set; }
@@ -19,7 +18,7 @@ namespace OTD.EnhancedOutputMode.Tablet
         public TouchConvertedReport(IDeviceReport report, Vector2 lastPos)
         {
             Raw = report.Raw;
-            ReportID = 1;
+            PenButtons = new bool[] {};
 
             if (report is ITouchReport touchreport)
             {
@@ -37,19 +36,20 @@ namespace OTD.EnhancedOutputMode.Tablet
         public TouchConvertedReport(ITouchReport report, Vector2 lastPos)
         {
             Raw = report.Raw;
-            ReportID = 1;
+            PenButtons = new bool[] {};
             
             HandleReport(report, lastPos);
         }
 
         public TouchConvertedReport()
         {
-            ReportID = 1;
+            Raw = new byte[] {};
+            PenButtons = new bool[] {};
         }
 
         public void HandleReport(ITouchReport touchReport, Vector2 lastPos)
         {
-            TouchPoint firstTouch = null;
+            TouchPoint firstTouch = null!;
 
             /*foreach(TouchPoint point in touchReport.Touches)
                 if ((firstTouch = point) != null)
@@ -77,13 +77,13 @@ namespace OTD.EnhancedOutputMode.Tablet
             {
                 Position = firstTouch.Position;
                 Pressure = 1;
-                ReportID = 1;
+                InRange = true;
             }
             else
             {
                 Position = lastPos;
                 Pressure = 0;
-                ReportID = 0;
+                InRange = false;
             }
 
             PenButtons = new bool[] {false};

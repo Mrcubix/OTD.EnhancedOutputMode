@@ -15,6 +15,8 @@ mv temp/OTD.EnhancedOutputMode.Lib.dll build/OTD.EnhancedOutputMode.Lib.dll
 mv temp/OTD.EnhancedOutputMode.Lib.pdb build/OTD.EnhancedOutputMode.Lib.pdb
 mv temp/VMulti.dll build/VMulti.dll
 mv temp/VMulti.pdb build/VMulti.pdb
+mv temp/VoiD.dll build/VoiD.dll
+mv temp/VoiD.pdb build/VoiD.pdb
 
 cd ./build
 

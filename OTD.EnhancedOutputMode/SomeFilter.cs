@@ -5,6 +5,7 @@ using OTD.EnhancedOutputMode.Lib.Interface;
 
 namespace yep
 {
+    /*[PluginIgnore]
     [PluginName("Example IGateFilter")]
     public class SomeFilter : IFilter, IGateFilter
     {
@@ -25,5 +26,5 @@ namespace yep
         }
 
         public FilterStage FilterStage => FilterStage.PreTranspose;
-    }
+    }*/
 }

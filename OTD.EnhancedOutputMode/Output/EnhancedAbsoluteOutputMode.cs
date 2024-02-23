@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
-using OpenTabletDriver.Desktop.Interop;
+using OpenTabletDriver;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
+using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
@@ -16,53 +17,80 @@ using OTD.EnhancedOutputMode.Tool;
 namespace OTD.EnhancedOutputMode.Output
 {
     [PluginName("Enhanced Absolute Mode")]
-    public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerOutputMode<IAbsolutePointer>
+    public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerProvider<IAbsolutePointer>
     {
-        private IList<IFilter> filters, preFilters, postFilters;
         private Vector2 min, max;
-        private bool _firstReport = true;
         private ITabletReport _convertedReport = new TouchConvertedReport();
+        private DigitizerSpecifications _touchDigitizer = new();
         private Vector2 _lastPos;
+        private bool _firstReport = true;
 
-        protected Matrix3x2 touchTransformationMatrix;
+        protected Matrix3x2 _touchTransformationMatrix;
 
-        public override IAbsolutePointer Pointer => SystemInterop.AbsolutePointer;
+#pragma warning disable CS8618
+
+        [Resolved]
+        public override IAbsolutePointer Pointer { set; get; }
+
+        [Resolved]
+        public IDriver _driver { set; get; }
+
+#pragma warning restore CS8618
+
+        [TabletReference]
+        public TabletReference TabletReference { set => Initialize(value); }
 
         public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
 
         #region Initialization
 
-        private void Initialize()
+        private void Initialize(TabletReference tabletReference)
         {
-            this.filters = Filters ?? Array.Empty<IFilter>();
+            var digitizer = tabletReference.Properties.Specifications.Digitizer;
+
+            var maxes = TouchSettings.Maxes;
+
+            // we want to prevent MaxX and MaxY from being lower than 0
+            if (TouchSettings.Maxes.X <= 0 || TouchSettings.Maxes.Y <= 0)
+                maxes = new Vector2(4095, 4095);
+
+            // Set touch digitizer specifications
+            _touchDigitizer = new DigitizerSpecifications
+            {
+                Width = digitizer.Width,
+                Height = digitizer.Height,
+                MaxX = (int)maxes.X,
+                MaxY = (int)maxes.Y,
+            };
+        }
+
+        public void FirstReportInitialize()
+        {
+            if (_driver is Driver driver)
+            {
+                var device = driver.InputDevices.Where(dev => dev?.OutputMode == this).FirstOrDefault();
+
+                if (device is not InputDeviceTree inputDevice)
+                    return;
+
+                if (device.OutputMode is not AbsoluteOutputMode absoluteMode)
+                    return;
+
+                // Calculate transformation matrix for touch
+                _touchTransformationMatrix = CreateTouchTransformationMatrix(absoluteMode);
+            }
 
             // Gather custom filters
-            GateFilters = Filters.OfType<IGateFilter>().ToList();
-            AuxFilters = Filters.OfType<IAuxFilter>().ToList();
+            // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
+            AuxFilters = Elements.OfType<IAuxFilter>().ToList();
 
-            // Set pre and post filters
-            if (Info.Driver.InterpolatorActive)
-                this.preFilters = Filters.Where(t => t.FilterStage == FilterStage.PreTranspose).ToList();
-            else
-                this.preFilters = Filters.Where(t => t.FilterStage == FilterStage.PreTranspose || t.FilterStage == FilterStage.PreInterpolate).ToList();
-                
-            this.postFilters = filters.Where(t => t.FilterStage == FilterStage.PostTranspose).ToList();
-
-            UpdateTouchTransformMatrix();
-
-            // we don't want to initialize again
             _firstReport = false;
         }
 
-        #endregion
-
-        #region Matrix Calculation
-
-        protected void UpdateTouchTransformMatrix()
+        protected virtual Matrix3x2 CreateTouchTransformationMatrix(AbsoluteOutputMode output)
         {
-            if (Input != null && Output != null && Tablet?.Digitizer != null)
-                this.touchTransformationMatrix = CalculateTouchTransformation(Input, Output, Tablet.Digitizer);
+            var transform = CalculateTransformation(output.Input, output.Output, _touchDigitizer);
 
             var halfDisplayWidth = Output?.Width / 2 ?? 0;
             var halfDisplayHeight = Output?.Height / 2 ?? 0;
@@ -74,122 +102,71 @@ namespace OTD.EnhancedOutputMode.Output
 
             this.min = new Vector2(minX, minY);
             this.max = new Vector2(maxX, maxY);
-        }
 
-        protected static Matrix3x2 CalculateTouchTransformation(Area input, Area output, DigitizerIdentifier tablet)
-        {
-            // Convert raw tablet data to millimeters
-            var res = Matrix3x2.CreateScale(
-                tablet.Width / TouchSettings.maxX,
-                tablet.Height / TouchSettings.maxY);
-
-            // Translate to the center of input area
-            res *= Matrix3x2.CreateTranslation(
-                -input.Position.X, -input.Position.Y);
-
-            // Apply rotation
-            res *= Matrix3x2.CreateRotation(
-                (float)(-input.Rotation * Math.PI / 180));
-
-            // Scale millimeters to pixels
-            res *= Matrix3x2.CreateScale(
-                output.Width / input.Width, output.Height / input.Height);
-
-            // Translate output to virtual screen coordinates
-            res *= Matrix3x2.CreateTranslation(
-                output.Position.X, output.Position.Y);
-
-            return res;
+            return transform;
         }
 
         #endregion
 
         #region Report Handling
 
-        public override void Read(IDeviceReport report)
+        public override void Consume(IDeviceReport report)
         {
-            if (_firstReport && Filters != null)
-                Initialize();
+            if (_firstReport)
+                FirstReportInitialize();
 
             if (report is ITouchReport touchReport)
             {
                 if (!TouchToggle.istouchToggled) return;
 
-                (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
+                (_convertedReport as TouchConvertedReport)!.HandleReport(touchReport, _lastPos);
 
-                if (_convertedReport.ReportID == 0)
+                if (_convertedReport.Pressure == 0)
                     return;
 
-                if (ShouldReport(report, ref _convertedReport))
-                {
-                    _lastPos = _convertedReport.Position;
-
-                    if (TransposeTouch(_convertedReport) is Vector2 pos)
-                    {
-                        Pointer.SetPosition(pos);
-                    }
-                }
+                _lastPos = _convertedReport.Position;
+                report = _convertedReport;
             }
-            else if (report is ITabletReport tabletReport)
-            {
-                if (Tablet.Digitizer.ActiveReportID.IsInRange(tabletReport.ReportID) && ShouldReport(report, ref tabletReport))
-                {
-                    if (Pointer is IVirtualTablet pressureHandler)
-                        pressureHandler.SetPressure((float)tabletReport.Pressure / (float)Tablet.Digitizer.MaxPressure);
 
-                    _lastPos = tabletReport.Position;
+            base.Consume(report);
+        }
 
-                    if (Transpose(tabletReport) is Vector2 pos)
-                    {
-                        Pointer.SetPosition(pos);
-                    }
-                }
-            }
-            else if (report is IAuxReport auxReport)
+        protected override void OnOutput(IDeviceReport report)
+        {
+            if (report is IAuxReport auxReport)
             {
                 foreach (var auxFilter in AuxFilters)
                     auxReport = auxFilter.AuxFilter(auxReport);
             }
+
+            base.OnOutput(report);
         }
 
-        protected bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
+        /// <summary>
+        /// Transposes, transforms, and performs all absolute positioning calculations to a <see cref="IAbsolutePositionReport"/>.
+        /// </summary>
+        /// <param name="report">The <see cref="IAbsolutePositionReport"/> in which to transform.</param>
+        protected override IAbsolutePositionReport Transform(IAbsolutePositionReport report)
         {
-            foreach (var gateFilter in this.GateFilters)
-                if (!gateFilter.Pass(report, ref tabletreport))
-                    return false;
-
-            return true;
-        }
-            
-
-        #endregion
-
-        #region Touch Transposition
-
-        protected Vector2? TransposeTouch(ITabletReport report)
-        {
-            var pos = new Vector2(report.Position.X, report.Position.Y);
-
-            // Pre Filter
-            foreach (IFilter filter in this.preFilters ??= Array.Empty<IFilter>())
-                pos = filter.Filter(pos);
+            Vector2 pos = Vector2.Zero;
 
             // Apply transformation
-            pos = Vector2.Transform(pos, this.touchTransformationMatrix);
+            if (report is TouchConvertedReport)
+                pos = Vector2.Transform(report.Position, this._touchTransformationMatrix);
+            else
+                pos = Vector2.Transform(report.Position, this.TransformationMatrix);
 
             // Clipping to display bounds
             var clippedPoint = Vector2.Clamp(pos, this.min, this.max);
             if (AreaLimiting && clippedPoint != pos)
-                return null;
+                return null!;
 
             if (AreaClipping)
                 pos = clippedPoint;
 
-            // Post Filter
-            foreach (IFilter filter in this.postFilters ??= Array.Empty<IFilter>())
-                pos = filter.Filter(pos);
+            report.Position = pos;
 
-            return pos;
+            return report;
         }
 
         #endregion

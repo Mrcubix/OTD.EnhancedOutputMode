@@ -1,3 +1,4 @@
+using System.Numerics;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 
@@ -50,5 +51,7 @@ namespace OTD.EnhancedOutputMode.Tool
         }
 
         public static int maxY;
+
+        public static Vector2 Maxes => new(maxX, maxY);
     }
 }

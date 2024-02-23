@@ -1,8 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <NoWarn>NETSDK1138</NoWarn>
+    <TargetFramework>net6.0</TargetFramework>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,7 +15,10 @@
     <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Native/OpenTabletDriver.Native.csproj" />
     <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Plugin/OpenTabletDriver.Plugin.csproj" />
     <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Desktop/OpenTabletDriver.Desktop.csproj" />
-    <ProjectReference Include="../.modules/VoiDPlugins/VoiDPlugins.Library/VMulti/VMulti.csproj" />
+
+    <ProjectReference Include="../.modules/VoiDPlugins/src/VoiDPlugins.Library/VMulti/VMulti.csproj" />
+    <ProjectReference Include="../.modules/VoiDPlugins/src/VoiDPlugins.Library/VoiD/VoiD.csproj" />
+    
     <ProjectReference Include="../OTD.EnhancedOutputMode.Lib/OTD.EnhancedOutputMode.Lib.csproj" />
   </ItemGroup>
 
