@@ -1,4 +1,5 @@
 using System;
+using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Platform.Display;
@@ -9,7 +10,7 @@ using OTD.EnhancedOutputMode.Pointer;
 
 namespace VoiDPlugins.OutputMode
 {
-    [PluginName("Enhanced VMulti Absolute Mode")]
+    [PluginName("Enhanced VMulti Absolute Mode"), SupportedPlatform(PluginPlatform.Windows)]
     public class VMultiAbsoluteMode : EnhancedAbsoluteOutputMode
     {
         private VMultiAbsolutePointer? _pointer;

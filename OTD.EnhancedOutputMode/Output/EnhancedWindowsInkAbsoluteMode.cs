@@ -1,4 +1,5 @@
 using System;
+using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Platform.Display;
@@ -8,7 +9,7 @@ using OTD.EnhancedOutputMode.Pointer.WindowsInk;
 
 namespace OTD.EnhancedOutputMode.Output
 {
-    [PluginName("Enhanced Windows Ink Absolute Mode")]
+    [PluginName("Enhanced Windows Ink Absolute Mode"), SupportedPlatform(PluginPlatform.Windows)]
     public class EnhancedWindowsInkAbsoluteMode : EnhancedAbsoluteOutputMode
     {
         private WindowsInkAbsolutePointer? _pointer;
