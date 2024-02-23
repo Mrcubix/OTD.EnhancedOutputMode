@@ -23,7 +23,7 @@ namespace OTD.EnhancedOutputMode.Output
         private ITabletReport _convertedReport = new TouchConvertedReport();
         private DigitizerSpecifications _touchDigitizer = new();
         private Vector2 _lastPos;
-        private bool _firstReport = true;
+        private bool _initialized = true;
 
         protected Matrix3x2 _touchTransformationMatrix;
 
@@ -38,19 +38,19 @@ namespace OTD.EnhancedOutputMode.Output
 #pragma warning restore CS8618
 
         [TabletReference]
-        public TabletReference TabletReference { set => Initialize(value); }
+        public TabletReference TabletReference { set => InitializeTouch(value); }
 
-        public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
 
         #region Initialization
 
-        private void Initialize(TabletReference tabletReference)
+        private void InitializeTouch(TabletReference tabletReference)
         {
             var digitizer = tabletReference.Properties.Specifications.Digitizer;
 
             var maxes = TouchSettings.Maxes;
 
+            // TODO, currently, TouchSettings isn't getting its values set early enough, we might want to load them from elsewhere
             // we want to prevent MaxX and MaxY from being lower than 0
             if (TouchSettings.Maxes.X <= 0 || TouchSettings.Maxes.Y <= 0)
                 maxes = new Vector2(4095, 4095);
@@ -65,8 +65,12 @@ namespace OTD.EnhancedOutputMode.Output
             };
         }
 
-        public void FirstReportInitialize()
+        public void Initialize()
         {
+            // Gather custom filters
+            // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
+            AuxFilters = Elements.OfType<IAuxFilter>().ToList();
+
             if (_driver is Driver driver)
             {
                 var device = driver.InputDevices.Where(dev => dev?.OutputMode == this).FirstOrDefault();
@@ -77,15 +81,14 @@ namespace OTD.EnhancedOutputMode.Output
                 if (device.OutputMode is not AbsoluteOutputMode absoluteMode)
                     return;
 
+                if (absoluteMode.Input == null || absoluteMode.Output == null)
+                    return;
+
                 // Calculate transformation matrix for touch
                 _touchTransformationMatrix = CreateTouchTransformationMatrix(absoluteMode);
+
+                _initialized = false;
             }
-
-            // Gather custom filters
-            // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
-            AuxFilters = Elements.OfType<IAuxFilter>().ToList();
-
-            _firstReport = false;
         }
 
         protected virtual Matrix3x2 CreateTouchTransformationMatrix(AbsoluteOutputMode output)
@@ -112,8 +115,8 @@ namespace OTD.EnhancedOutputMode.Output
 
         public override void Consume(IDeviceReport report)
         {
-            if (_firstReport)
-                FirstReportInitialize();
+            if (_initialized)
+                Initialize();
 
             if (report is ITouchReport touchReport)
             {
