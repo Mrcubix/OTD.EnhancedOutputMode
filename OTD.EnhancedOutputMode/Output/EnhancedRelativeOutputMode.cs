@@ -19,7 +19,7 @@ namespace OTD.EnhancedOutputMode.Output
     {
         private ITabletReport _convertedReport = new TouchConvertedReport();
         private Vector2 _lastPos;
-        private bool _initialize = true;
+        private bool _initialized = false;
 
         protected Matrix3x2 _touchTransformationMatrix;
 
@@ -40,7 +40,7 @@ namespace OTD.EnhancedOutputMode.Output
             // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
             AuxFilters = Elements.OfType<IAuxFilter>().ToList();
 
-            _initialize = false;
+            _initialized = true;
         }
 
         #endregion
@@ -49,7 +49,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         public override void Consume(IDeviceReport report)
         {
-            if(_initialize)
+            if(!_initialized)
                 Initialize();
 
             base.Consume(report);

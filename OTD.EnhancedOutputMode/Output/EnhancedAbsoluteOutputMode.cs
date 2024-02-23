@@ -23,7 +23,7 @@ namespace OTD.EnhancedOutputMode.Output
         private ITabletReport _convertedReport = new TouchConvertedReport();
         private DigitizerSpecifications _touchDigitizer = new();
         private Vector2 _lastPos;
-        private bool _initialized = true;
+        private bool _initialized = false;
 
         protected Matrix3x2 _touchTransformationMatrix;
 
@@ -87,7 +87,7 @@ namespace OTD.EnhancedOutputMode.Output
                 // Calculate transformation matrix for touch
                 _touchTransformationMatrix = CreateTouchTransformationMatrix(absoluteMode);
 
-                _initialized = false;
+                _initialized = true;
             }
         }
 
@@ -115,7 +115,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         public override void Consume(IDeviceReport report)
         {
-            if (_initialized)
+            if (!_initialized)
                 Initialize();
 
             if (report is ITouchReport touchReport)
