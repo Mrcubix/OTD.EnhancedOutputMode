@@ -8,7 +8,6 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
-using OpenTabletDriver.Plugin.Timing;
 using OTD.EnhancedOutputMode.Lib.Interface;
 using OTD.EnhancedOutputMode.Tablet;
 using OTD.EnhancedOutputMode.Tool;
@@ -20,11 +19,10 @@ namespace OTD.EnhancedOutputMode.Output
     {
         private ITabletReport _convertedReport = new TouchConvertedReport();
         private Vector2 _lastPos;
-        private bool _firstReport = true;
+        private bool _initialize = true;
 
         protected Matrix3x2 _touchTransformationMatrix;
 
-        public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
 
 #pragma warning disable CS8618
@@ -36,13 +34,13 @@ namespace OTD.EnhancedOutputMode.Output
 
         #region Initialization
 
-        public void FirstReportInitialize()
+        public void Initialize()
         {
             // Gather custom filters
             // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
             AuxFilters = Elements.OfType<IAuxFilter>().ToList();
 
-            _firstReport = false;
+            _initialize = false;
         }
 
         #endregion
@@ -51,8 +49,8 @@ namespace OTD.EnhancedOutputMode.Output
 
         public override void Consume(IDeviceReport report)
         {
-            if(_firstReport)
-                FirstReportInitialize();
+            if(_initialize)
+                Initialize();
 
             base.Consume(report);
         }
