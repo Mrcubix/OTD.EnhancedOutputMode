@@ -1,16 +1,11 @@
-using System.Linq;
-using System.Numerics;
 using OpenTabletDriver.Plugin.Attributes;
-using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
-using OpenTabletDriver.Plugin.Tablet;
-using OpenTabletDriver.Plugin.Tablet.Touch;
-using OTD.EnhancedOutputMode.Tablet;
 using OTD.EnhancedOutputMode.Pointer;
+using OpenTabletDriver.Plugin;
 
 namespace OTD.EnhancedOutputMode.Output
 {
-    [PluginName("Enhanced VMulti Relative Mode")]
+    [PluginName("Enhanced VMulti Relative Mode"), SupportedPlatform(PluginPlatform.Windows)]
     public class EnhancedVMultiRelativeOutputMode : EnhancedRelativeOutputMode
     {
         private readonly VMultiRelativePointer pointer = new();
