@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
@@ -14,6 +15,10 @@ namespace OTD.EnhancedOutputMode.Tool
 
 	    public void Dispose() {}
 
+        #region Properties
+
+        #region Max X
+
         [Property("Max X"),
          DefaultPropertyValue(4095),
          ToolTip("OTD.EnhancedOutputMode:\n\n" +
@@ -27,11 +32,15 @@ namespace OTD.EnhancedOutputMode.Tool
             }
             set
             {
-                maxX = value;
+                maxX = Math.Max(0, value);
             }
         }
 
         public static int maxX;
+
+        #endregion
+
+        #region Max Y
 
         [Property("Max Y"),
          DefaultPropertyValue(4095),
@@ -46,11 +55,15 @@ namespace OTD.EnhancedOutputMode.Tool
             }
             set
             {
-                maxY = value;
+                maxY = Math.Max(0, value);
             }
         }
 
         public static int maxY;
+
+        #endregion
+
+        #endregion
 
         public static Vector2 Maxes => new(maxX, maxY);
     }

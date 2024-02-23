@@ -47,12 +47,16 @@ namespace OTD.EnhancedOutputMode.Output
         private void InitializeTouch(TabletReference tabletReference)
         {
             var digitizer = tabletReference.Properties.Specifications.Digitizer;
+            var touch = tabletReference.Properties.Specifications.Touch;
 
-            var maxes = TouchSettings.Maxes;
+            Vector2 maxes;
 
             // TODO, currently, TouchSettings isn't getting its values set early enough, we might want to load them from elsewhere
-            // we want to prevent MaxX and MaxY from being lower than 0
-            if (TouchSettings.Maxes.X <= 0 || TouchSettings.Maxes.Y <= 0)
+            if (touch != null)
+                maxes = new Vector2(touch.MaxX, touch.MaxY);
+            else if (TouchSettings.Maxes != Vector2.Zero) 
+                maxes = TouchSettings.Maxes;
+            else
                 maxes = new Vector2(4095, 4095);
 
             // Set touch digitizer specifications
