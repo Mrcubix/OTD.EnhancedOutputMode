@@ -6,6 +6,11 @@
 - Add support for touch for supported tablets
 - Has support for the base OpenTabletDriver output modes as well as VoiD's (Windows Ink & Vmulti)
 
+## Known issues caused by displaying images
+
+- Tablet Coil whine when displays are active,
+- Large amount of chatter get generated.
+
 ## Installation
 
 1. Download the latest release from the [releases page](https://github.com/Mrcubix/OTD.EnhancedOutputMode/releases/latest)
