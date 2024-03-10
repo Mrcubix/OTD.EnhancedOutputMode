@@ -7,7 +7,7 @@ using VoiDPlugins.Library.VMulti.Device;
 using VoiDPlugins.Library.VoiD;
 using static OTD.EnhancedOutputMode.Constants.VMultiModeConstants;
 
-namespace OTD.EnhancedOutputMode.Pointer
+namespace OTD.EnhancedOutputMode.Pointers.VMulti
 {
     public unsafe class VMultiRelativePointer : IRelativePointer, ISynchronousPointer
     {

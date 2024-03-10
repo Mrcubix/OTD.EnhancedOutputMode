@@ -3,7 +3,7 @@ using System.Numerics;
 using System.Runtime.InteropServices;
 using OpenTabletDriver.Plugin.Platform.Display;
 
-namespace OTD.EnhancedOutputMode.Pointer.WindowsInk
+namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct INPUT

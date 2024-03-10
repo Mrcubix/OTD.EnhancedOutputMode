@@ -5,7 +5,7 @@ using OpenTabletDriver.Plugin.DependencyInjection;
 using OpenTabletDriver.Plugin.Platform.Display;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
-using OTD.EnhancedOutputMode.Pointer.WindowsInk;
+using OTD.EnhancedOutputMode.Pointers.WindowsInk;
 
 namespace OTD.EnhancedOutputMode.Output
 {

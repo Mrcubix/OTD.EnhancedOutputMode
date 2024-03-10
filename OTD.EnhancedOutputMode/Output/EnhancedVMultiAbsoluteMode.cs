@@ -6,7 +6,7 @@ using OpenTabletDriver.Plugin.Platform.Display;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OTD.EnhancedOutputMode.Output;
-using OTD.EnhancedOutputMode.Pointer;
+using OTD.EnhancedOutputMode.Pointers.VMulti;
 
 namespace VoiDPlugins.OutputMode
 {

@@ -4,7 +4,7 @@ using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OTD.EnhancedOutputMode.Enums;
 
-namespace OTD.EnhancedOutputMode.Pointer.WindowsInk
+namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
 {
     public unsafe class WindowsInkRelativePointer : WinInkBasePointer, IRelativePointer
     {

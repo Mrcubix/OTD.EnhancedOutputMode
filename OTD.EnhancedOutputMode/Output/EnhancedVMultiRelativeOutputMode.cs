@@ -2,7 +2,7 @@ using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
-using OTD.EnhancedOutputMode.Pointer;
+using OTD.EnhancedOutputMode.Pointers.VMulti;
 
 namespace OTD.EnhancedOutputMode.Output
 {

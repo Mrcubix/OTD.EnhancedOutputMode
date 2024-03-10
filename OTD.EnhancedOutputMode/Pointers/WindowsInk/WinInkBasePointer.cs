@@ -8,7 +8,7 @@ using VoiDPlugins.Library.VMulti.Device;
 using VoiDPlugins.Library.VoiD;
 using static OTD.EnhancedOutputMode.Constants.WindowsInkConstants;
 
-namespace OTD.EnhancedOutputMode.Pointer.WindowsInk
+namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
 {
     public unsafe abstract class WinInkBasePointer : IPressureHandler, ITiltHandler, IEraserHandler, ISynchronousPointer
     {
