@@ -117,11 +117,11 @@ namespace OTD.EnhancedOutputMode.Output
 
                 (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
 
-                if (_convertedReport.ReportID == 0)
-                    return;
-
                 if (ShouldReport(report, ref _convertedReport))
                 {
+                    if (_convertedReport.ReportID == 0)
+                        return;
+
                     _lastPos = _convertedReport.Position;
 
                     if (TransposeTouch(_convertedReport) is Vector2 pos)
