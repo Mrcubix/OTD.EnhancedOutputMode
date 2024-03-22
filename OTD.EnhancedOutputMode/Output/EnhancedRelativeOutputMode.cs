@@ -24,15 +24,24 @@ namespace OTD.EnhancedOutputMode.Output
         private bool _firstReport = true;
         private Vector2 _lastPos;
         private int _lastTouchID = -1;
+
+        public void Initialize()
+        {
+            GateFilters = Filters.OfType<IGateFilter>().ToList();
+            AuxFilters = Filters.OfType<IAuxFilter>().ToList();
+
+            // Initialize filters that require initialization
+            foreach (var filter in Filters.OfType<IInitialize>())
+                filter.Initialize();
+
+            // we don't want to initialize again
+            _firstReport = false;
+        }
         
         public override void Read(IDeviceReport report)
         {
             if (_firstReport && Filters != null)
-            {
-                GateFilters = Filters.OfType<IGateFilter>().ToList();
-                AuxFilters = Filters.OfType<IAuxFilter>().ToList();
-                _firstReport = false;
-            }
+                Initialize();
 
             if (report is ITouchReport touchreport)
             {

@@ -5,6 +5,7 @@ using OTD.EnhancedOutputMode.Lib.Interface;
 
 namespace yep
 {
+    [PluginIgnore]
     [PluginName("Example IGateFilter")]
     public class SomeFilter : IFilter, IGateFilter
     {
@@ -12,7 +13,6 @@ namespace yep
 
         public bool Pass(IDeviceReport report, ref ITabletReport tabletreport)
         {
-            
             if (tabletreport.Pressure > 0)
             {
                 // Affect the input in some way
