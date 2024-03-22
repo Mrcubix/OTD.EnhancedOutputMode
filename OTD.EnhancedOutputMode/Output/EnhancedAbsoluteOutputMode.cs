@@ -41,6 +41,12 @@ namespace OTD.EnhancedOutputMode.Output
             GateFilters = Filters.OfType<IGateFilter>().ToList();
             AuxFilters = Filters.OfType<IAuxFilter>().ToList();
 
+            // Initialize filters that require initialization
+            var initializationDependantFilters = Filters.OfType<IInitialize>().ToList();
+
+            foreach (var filter in initializationDependantFilters)
+                filter.Initialize();
+
             // Set pre and post filters
             if (Info.Driver.InterpolatorActive)
                 this.preFilters = Filters.Where(t => t.FilterStage == FilterStage.PreTranspose).ToList();
