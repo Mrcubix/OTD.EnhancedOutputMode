@@ -75,6 +75,10 @@ namespace OTD.EnhancedOutputMode.Output
             // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
             AuxFilters = Elements.OfType<IAuxFilter>().ToList();
 
+            // Initialize filters that require initialization
+            foreach (var filter in Elements.OfType<IInitialize>())
+                filter.Initialize();
+
             if (_driver is Driver driver)
             {
                 var device = driver.InputDevices.Where(dev => dev?.OutputMode == this).FirstOrDefault();
