@@ -17,15 +17,35 @@
 2. Open the plugin manager in OpenTabletDriver
 3. Drag the downloaded .zip file into the plugin manager
 
+## How to Enable Touch
+
+Touch is disabled by default, to prevent any conflict of inputs between the pen and your hand.
+To enable touch, you can follow these steps:
+
+- Go to the `Tools` tab in OpenTabletDriver,
+- Click on Touch Toggle, tick `Enable Touch Toggle` & `Toggle Touch`,
+
+![Touch Toggle](/images/Touch-toggle.png)
+
+Just doing this might not be enough if the touch resolution of your tablet is different from the Wacom CTH tablets,
+In which case you will need to set these values manually using the following steps:
+
+- Click on `Touch Settings`,
+- From there, you might want to open the debugger (Tablet -> Tablet Debugger in the top menu bar),
+- Move your finger slowly to the bottom right of the tablet until the touch values stop changing, 
+- Take note of the X and Y values,
+- Write these values in `MaxX` & `MaxY` in the `Touch Settings` plugin.
+- Save & Apply and it should work as expected.
+
 ## Supported Versions
 
 - OpenTabletDriver v0.5.3.3
+- OpenTabletDriver v0.6.4.0
 
-## Touch Supported Tablets
+## Touch Supported Tablets (Tested)
 
-- Wacom PTK-x40,
 - Wacom PTH-x51,
-- Probably some other wacom tablets
+- Wacom CTH-xxx,
 
 ## How to make a plugin
 
