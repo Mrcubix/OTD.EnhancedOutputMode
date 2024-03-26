@@ -5,7 +5,7 @@ using OpenTabletDriver.Plugin.Platform.Pointer;
 
 namespace OTD.EnhancedOutputMode.Output
 {
-    [PluginName("Enhanced VMulti Absolute Mode"), SupportedPlatform(PluginPlatform.Linux)]
+    [PluginName("Enhanced Artist Mode"), SupportedPlatform(PluginPlatform.Linux)]
     public class EnhancedArtistMode : EnhancedAbsoluteOutputMode
     {
         private readonly EvdevVirtualTablet penHandler = new EvdevVirtualTablet();
