@@ -3,7 +3,7 @@ using System.Numerics;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
 
-namespace OTD.EnhancedOutputMode.Tool
+namespace OTD.EnhancedOutputMode.Lib.Tools
 {
     [PluginName("Touch Settings")]
     public class TouchSettings : ITool
