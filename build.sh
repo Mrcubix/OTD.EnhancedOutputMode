@@ -18,6 +18,6 @@ mv temp/VMulti.pdb build/VMulti.pdb
 
 cd ./build
 
-zip -r OTD.EnhancedOutputMode.zip *
+zip -r OTD.EnhancedOutputMode-0.5.x.zip *
 
 cd ..
