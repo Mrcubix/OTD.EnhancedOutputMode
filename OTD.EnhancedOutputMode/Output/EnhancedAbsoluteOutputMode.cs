@@ -73,6 +73,9 @@ namespace OTD.EnhancedOutputMode.Output
         {
             // Gather custom filters
             // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
+            if (Elements == null)
+                return;
+
             AuxFilters = Elements.OfType<IAuxFilter>().ToList();
 
             // Initialize filters that require initialization
@@ -132,11 +135,11 @@ namespace OTD.EnhancedOutputMode.Output
 
                 (_convertedReport as TouchConvertedReport)!.HandleReport(touchReport, _lastPos);
 
-                if (_convertedReport.Pressure == 0)
-                    return;
-
-                _lastPos = _convertedReport.Position;
-                report = _convertedReport;
+                if (_convertedReport.Pressure != 0)
+                {
+                    _lastPos = _convertedReport.Position;
+                    base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it
+                }
             }
 
             base.Consume(report);

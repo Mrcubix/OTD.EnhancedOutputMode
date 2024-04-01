@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Numerics;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Tablet;
@@ -5,7 +6,7 @@ using OpenTabletDriver.Plugin.Tablet.Touch;
 
 namespace OTD.EnhancedOutputMode.Tablet
 {
-    public class TouchConvertedReport: ITabletReport
+    public class TouchConvertedReport : ITabletReport
     {
         public static int CurrentFirstTouchID { get; set; } = -1;
 
@@ -47,17 +48,21 @@ namespace OTD.EnhancedOutputMode.Tablet
             PenButtons = new bool[] {};
         }
 
+        /// <summary>
+        ///   Handles the touch report and sets the position accordingly.
+        /// </summary>
+        /// <param name="touchReport">The touch report to handle.</param>
+        /// <param name="lastPos">The last known position.</param>
+        /// <remarks>
+        ///   This method works without issues in 0.5, however, further handling is required in 0.6 as a large delta is being caused by something.
+        /// </remarks>
         public void HandleReport(ITouchReport touchReport, Vector2 lastPos)
         {
-            TouchPoint firstTouch = null!;
+            TouchPoint? firstTouch = null;
 
-            /*foreach(TouchPoint point in touchReport.Touches)
-                if ((firstTouch = point) != null)
-                    break;*/
-
-            // The current first touch from the previous report might have been cached, we still need to check if it's still valid
+            // Touch ID stays the same until the touch is released
             if (CurrentFirstTouchID != -1)
-                firstTouch = touchReport.Touches[CurrentFirstTouchID];
+                firstTouch = touchReport.Touches.FirstOrDefault(point => point != null && point.TouchID == CurrentFirstTouchID);
 
             // If the cached first touch is no longer valid, we need to find a new one
             if (firstTouch == null)
@@ -67,7 +72,7 @@ namespace OTD.EnhancedOutputMode.Tablet
                 while (firstTouch == null && index < touchReport.Touches.Length)
                 {
                     firstTouch = touchReport.Touches[index];
-                    CurrentFirstTouchID = index;
+                    CurrentFirstTouchID = firstTouch?.TouchID ?? -1;
                     index++;
                 }
             }
@@ -86,7 +91,7 @@ namespace OTD.EnhancedOutputMode.Tablet
                 InRange = false;
             }
 
-            PenButtons = new bool[] {false};
+            PenButtons = new bool[] { false };
         }
     }
 }
