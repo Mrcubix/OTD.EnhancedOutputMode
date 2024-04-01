@@ -1,21 +1,38 @@
 using System;
 using System.Numerics;
-using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
+using OpenTabletDriver.Plugin.Output;
+using OpenTabletDriver.Plugin.Tablet;
 
 namespace OTD.EnhancedOutputMode.Lib.Tools
 {
     [PluginName("Touch Settings")]
-    public class TouchSettings : ITool
+    public class TouchSettings : IPositionedPipelineElement<IDeviceReport>
     {
-        public bool Initialize()
-        {
-            return true;
-        }
+        public void Consume(IDeviceReport value) => Emit?.Invoke(value);
 
-	    public void Dispose() {}
+        #region Events
+
+        public static event EventHandler<Vector2> MaxesChanged;
+        public event Action<IDeviceReport> Emit;
+
+        #endregion
 
         #region Properties
+
+        [BooleanProperty("Toggle Touch", ""),
+         DefaultPropertyValue(true),
+         ToolTip("OTD.EnhancedOutputMode:\n\n" +
+                 "When Enabled, touch reports will be handled in Enhanced output modes."
+                )
+        ]
+        public bool IsTouchToggled 
+        { 
+            get => istouchToggled;
+            set => istouchToggled = value;
+        }
+
+        public static bool istouchToggled;
 
         #region Max X
 
@@ -26,13 +43,11 @@ namespace OTD.EnhancedOutputMode.Lib.Tools
                  "Check the debugger for the correct value.")]
         public int MaxX
         {
-            get
-            {
-                return maxX;
-            }
+            get => maxX;
             set
             {
                 maxX = Math.Max(0, value);
+                MaxesChanged?.Invoke(this, Maxes);
             }
         }
 
@@ -49,13 +64,11 @@ namespace OTD.EnhancedOutputMode.Lib.Tools
                  "Check the debugger for the correct value.")]
         public int MaxY
         {
-            get
-            {
-                return maxY;
-            }
+            get => maxY;
             set
             {
                 maxY = Math.Max(0, value);
+                MaxesChanged?.Invoke(this, Maxes);
             }
         }
 
@@ -63,8 +76,10 @@ namespace OTD.EnhancedOutputMode.Lib.Tools
 
         #endregion
 
-        #endregion
-
         public static Vector2 Maxes => new(maxX, maxY);
+
+        public PipelinePosition Position => PipelinePosition.None;
+
+        #endregion
     }
 }
