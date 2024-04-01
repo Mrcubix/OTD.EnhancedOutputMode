@@ -117,7 +117,7 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (report is ITouchReport touchReport)
             {
-                if (!TouchToggle.istouchToggled) return;
+                if (!TouchSettings.istouchToggled) return;
 
                 (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
 

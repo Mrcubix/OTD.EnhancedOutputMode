@@ -45,7 +45,7 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (report is ITouchReport touchreport)
             {
-                if (!TouchToggle.istouchToggled) return;
+                if (!TouchSettings.istouchToggled) return;
                 
                 ITabletReport touchConvertedReport = new TouchConvertedReport(touchreport, _lastPos);
 
