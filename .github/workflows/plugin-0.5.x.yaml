@@ -1,0 +1,43 @@
+name: Build 0.5.x Plugin
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+jobs:
+
+  Build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout master (0.5.x)
+      uses: actions/checkout@v4
+      with:
+        ref: master
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Build
+      run: bash ./build.sh
+
+    - name: Remove PDB files
+      run: |
+        find ./build -name "*.pdb" -type f -delete
+
+    - uses: actions/upload-artifact@main
+      with:
+        name: "OTD.EnhancedTouchGestures-0.5.x"
+        path: |
+          ./build/*
+          !./build/*.pdb
