@@ -37,7 +37,7 @@ jobs:
 
     - uses: actions/upload-artifact@main
       with:
-        name: "OTD.EnhancedTouchGestures-0.6.x"
+        name: "OTD.EnhancedOutputMode-0.6.x"
         path: |
           ./build/*
           !./build/*.pdb
