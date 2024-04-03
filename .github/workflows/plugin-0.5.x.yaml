@@ -39,5 +39,5 @@ jobs:
       with:
         name: "OTD.EnhancedOutputMode-0.5.x"
         path: |
-          ./build/*
+          ./build/*.dll
           !./build/*.pdb
