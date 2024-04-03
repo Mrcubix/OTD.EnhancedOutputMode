@@ -3,11 +3,11 @@ name: Build 0.6.x Plugin
 on:
   push:
     branches:
-      - master
+      - 0.6.x
 
   pull_request:
     branches:
-      - master
+      - 0.6.x
 
   workflow_dispatch:
 
