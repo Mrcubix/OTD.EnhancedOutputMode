@@ -1,0 +1,49 @@
+name: Generate Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'The tag to create for the release'
+        required: true
+
+jobs:
+  release:
+    permissions:
+      contents: write
+
+    # Build the master & 0.6.x branches
+    strategy:
+      matrix:
+        include:
+          - { branch: master, runtime: 5.0.x, otd_version: 0.5.x }
+          - { branch: 0.6.x, runtime: 6.0.x, otd_version: 0.6.x }
+
+    runs-on: ubuntu-latest
+    name: Generate Release
+    env:
+      TAG: ${{ github.event.inputs.tag }}
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ matrix.branch }}
+        submodules: recursive
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ matrix.runtime }}
+
+    - name: Build
+      run: bash ./build.sh
+
+    - name: Create Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        OTD_VERSION: ${{ matrix.otd_version }}
+      run: |
+        declare -a files
+        # Add Installers
+        files+=("build/OTD.EnhancedOutputMode-$OTD_VERSION.zip")
+        gh release create -d -t "Enhanced Output Mode $TAG" "$TAG" "${files[@]}" -F build/hashes.txt

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 dotnet restore
 
@@ -16,8 +16,11 @@ mv temp/OTD.EnhancedOutputMode.Lib.pdb build/OTD.EnhancedOutputMode.Lib.pdb
 mv temp/VMulti.dll build/VMulti.dll
 mv temp/VMulti.pdb build/VMulti.pdb
 
-cd ./build
+(
+    cd ./build
 
-zip -r OTD.EnhancedOutputMode-0.5.x.zip *
+    zip -r OTD.EnhancedOutputMode-0.5.x.zip *
 
-cd ..
+    # Compute checksums
+    sha256sum OTD.EnhancedOutputMode-0.5.x.zip > hashes.txt
+)
