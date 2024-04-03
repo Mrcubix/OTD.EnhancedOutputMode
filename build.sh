@@ -2,12 +2,14 @@
 
 dotnet restore
 
-dotnet publish -c Release -o temp $@ || exit 1
+dotnet publish OTD.EnhancedOutputMode -c Release -o temp $@ || exit 1
 
 # create a folder if it doesn't existr named "build"
-mkdir build
-
-rm -rf build/*
+if [ ! -d "build" ]; then
+    mkdir build
+else
+    rm -rf build/*
+fi
 
 mv temp/OTD.EnhancedOutputMode.dll build/OTD.EnhancedOutputMode.dll
 mv temp/OTD.EnhancedOutputMode.pdb build/OTD.EnhancedOutputMode.pdb
