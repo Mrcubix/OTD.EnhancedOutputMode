@@ -21,7 +21,7 @@ mv temp/VoiD.pdb build/VoiD.pdb
 (
     cd ./build
 
-    zip -r OTD.EnhancedOutputMode-0.6.x.zip *
+    zip -r OTD.EnhancedOutputMode-0.6.x.zip ./*
 
     # Compute checksums
     sha256sum OTD.EnhancedOutputMode-0.6.x.zip > hashes.txt
