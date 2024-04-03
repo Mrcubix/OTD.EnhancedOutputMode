@@ -47,6 +47,8 @@ jobs:
         # if OTD_VERSION is not 0.5.x, add "-OTD_VERSION" to the tag
         if [ "$OTD_VERSION" != "0.5.x" ]; then
           output_tag="$TAG-$OTD_VERSION"
+        else
+          output_tag="$TAG"
         fi
         # Add Installers
         files+=("build/OTD.EnhancedOutputMode-$OTD_VERSION.zip")
