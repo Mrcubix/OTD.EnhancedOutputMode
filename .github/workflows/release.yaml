@@ -52,4 +52,4 @@ jobs:
         fi
         # Add Installers
         files+=("build/OTD.EnhancedOutputMode-$OTD_VERSION.zip")
-        gh release create -d -t "Enhanced Output Mode $TAG" "$output_tag" "${files[@]}" -F build/hashes.txt
+        gh release create -d -t "Enhanced Output Mode $TAG for $OTD_VERSION" "$output_tag" "${files[@]}" -F build/hashes.txt
