@@ -42,6 +42,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         OTD_VERSION: ${{ matrix.otd_version }}
+        BRANCH: ${{ matrix.branch }}
       run: |
         declare -a files
         # if OTD_VERSION is not 0.5.x, add "-OTD_VERSION" to the tag
@@ -52,4 +53,4 @@ jobs:
         fi
         # Add Installers
         files+=("build/OTD.EnhancedOutputMode-$OTD_VERSION.zip")
-        gh release create -d -t "Enhanced Output Mode $TAG for $OTD_VERSION" "$output_tag" "${files[@]}" -F build/hashes.txt
+        gh release create -d -t "Enhanced Output Mode $TAG for $OTD_VERSION" "$output_tag" "${files[@]}" -F build/hashes.txt --target $BRANCH
