@@ -44,6 +44,10 @@ jobs:
         OTD_VERSION: ${{ matrix.otd_version }}
       run: |
         declare -a files
+        # if OTD_VERSION is not 0.5.x, add "-OTD_VERSION" to the tag
+        if [ "$OTD_VERSION" != "0.5.x" ]; then
+          output_tag="$TAG-$OTD_VERSION"
+        fi
         # Add Installers
         files+=("build/OTD.EnhancedOutputMode-$OTD_VERSION.zip")
-        gh release create -d -t "Enhanced Output Mode $TAG" "$TAG" "${files[@]}" -F build/hashes.txt
+        gh release create -d -t "Enhanced Output Mode $TAG" "$output_tag" "${files[@]}" -F build/hashes.txt
