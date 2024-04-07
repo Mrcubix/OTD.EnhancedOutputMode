@@ -10,6 +10,7 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
+using OpenTabletDriver.Plugin.Timing;
 using OTD.EnhancedOutputMode.Lib.Interface;
 using OTD.EnhancedOutputMode.Lib.Tools;
 using OTD.EnhancedOutputMode.Tablet;
@@ -19,11 +20,13 @@ namespace OTD.EnhancedOutputMode.Output
     [PluginName("Enhanced Absolute Mode")]
     public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerProvider<IAbsolutePointer>
     {
-        private Vector2 min, max;
-        private ITabletReport _convertedReport = new TouchConvertedReport();
+        private readonly ITabletReport _convertedReport = new TouchConvertedReport();
+        private readonly HPETDeltaStopwatch _penStopwatch = new(true);
+        private TouchSettings _touchSettings = TouchSettings.Default;
         private DigitizerSpecifications _touchDigitizer = new();
-        private Vector2 _lastPos;
         private bool _initialized = false;
+        private Vector2 min, max;
+        private Vector2 _lastPos;
 
         protected Matrix3x2 _touchTransformationMatrix;
 
@@ -37,10 +40,9 @@ namespace OTD.EnhancedOutputMode.Output
 
 #pragma warning restore CS8618
 
-        [TabletReference]
-        public TabletReference TabletReference { set => InitializeTouch(value); }
-
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
+
+        public TouchSettings TouchSettings { get; private set; } = TouchSettings.Default;
 
         #region Initialization
 
@@ -54,8 +56,8 @@ namespace OTD.EnhancedOutputMode.Output
             // TODO, currently, TouchSettings isn't getting its values set early enough, we might want to load them from elsewhere
             if (touch != null)
                 maxes = new Vector2(touch.MaxX, touch.MaxY);
-            else if (TouchSettings.Maxes != Vector2.Zero) 
-                maxes = TouchSettings.Maxes;
+            else if (_touchSettings.Maxes != Vector2.Zero) 
+                maxes = _touchSettings.Maxes;
             else
                 maxes = new Vector2(4095, 4095);
 
@@ -76,6 +78,13 @@ namespace OTD.EnhancedOutputMode.Output
             if (Elements == null)
                 return;
 
+            _touchSettings = Elements.OfType<TouchSettings>().FirstOrDefault() ?? TouchSettings.Default;
+
+            // Initialize touch digitizer
+            InitializeTouch(Tablet);
+
+            // Gather custom filters
+            // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
             AuxFilters = Elements.OfType<IAuxFilter>().ToList();
 
             // Initialize filters that require initialization
@@ -124,6 +133,15 @@ namespace OTD.EnhancedOutputMode.Output
 
         #region Report Handling
 
+        public override void Read(IDeviceReport deviceReport)
+        {
+            if (deviceReport is ITabletReport) // Restart the pen stopwatch when a pen report is received
+                if (_touchSettings.DisableWhenPenInRange)
+                    _penStopwatch.Restart();
+
+            base.Read(deviceReport);
+        }
+
         public override void Consume(IDeviceReport report)
         {
             if (!_initialized)
@@ -131,7 +149,11 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (report is ITouchReport touchReport)
             {
-                if (!TouchSettings.istouchToggled) return;
+                if (!TouchSettings.IsTouchToggled) return;
+
+                // Check if the pen was in range recently and skip report if it was
+                if (_touchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < _touchSettings.PenResetTimeSpan)
+                    return;
 
                 (_convertedReport as TouchConvertedReport)!.HandleReport(touchReport, _lastPos);
 
