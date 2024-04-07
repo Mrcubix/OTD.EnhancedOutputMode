@@ -8,6 +8,7 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
+using OpenTabletDriver.Plugin.Timing;
 using OTD.EnhancedOutputMode.Lib.Interface;
 using OTD.EnhancedOutputMode.Lib.Tools;
 using OTD.EnhancedOutputMode.Tablet;
@@ -17,16 +18,27 @@ namespace OTD.EnhancedOutputMode.Output
     [PluginName("Enhanced Relative Mode")]
     public class EnhancedRelativeOutputMode : RelativeOutputMode, IPointerOutputMode<IRelativePointer>
     {
+        private ITabletReport _convertedReport = new TouchConvertedReport();
+        private HPETDeltaStopwatch _penStopwatch = new(true);
+        private bool _firstReport = true;
+        private int _lastTouchID = -1;
+        private Vector2 _lastPos;
+
         public override IRelativePointer Pointer => SystemInterop.RelativePointer;
 
         public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
-        private bool _firstReport = true;
-        private Vector2 _lastPos;
-        private int _lastTouchID = -1;
+        public TouchSettings TouchSettings { get; private set; } = TouchSettings.Default;
 
         public void Initialize()
         {
+            if (Filters == null) return;
+
+            TouchSettings = TouchSettings.Instance ?? TouchSettings.Default;
+
+            if (TouchSettings.Instance == null)
+                Console.WriteLine("TouchSettings instance is null");
+
             GateFilters = Filters.OfType<IGateFilter>().ToList();
             AuxFilters = Filters.OfType<IAuxFilter>().ToList();
 
@@ -43,20 +55,23 @@ namespace OTD.EnhancedOutputMode.Output
             if (_firstReport && Filters != null)
                 Initialize();
 
-            if (report is ITouchReport touchreport)
+            if (report is ITouchReport touchReport)
             {
-                if (!TouchSettings.istouchToggled) return;
+                if (!TouchSettings.IsTouchToggled) return;
+
+                // Check if the pen was in range recently and skip report if it was
+                if (TouchSettings.DisableWhenPenInRange)
+                    if (_penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
+                        return;
                 
-                ITabletReport touchConvertedReport = new TouchConvertedReport(touchreport, _lastPos);
+                (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
 
-                if (ShouldReport(report, ref touchConvertedReport))
+                if (ShouldReport(report, ref _convertedReport))
                 {
-                    _lastPos = touchConvertedReport.Position;
+                    _lastPos = _convertedReport.Position;
 
-                    if (Transpose(touchConvertedReport) is Vector2 pos && _lastTouchID == TouchConvertedReport.CurrentFirstTouchID)
-                    {
+                    if (Transpose(_convertedReport) is Vector2 pos && _lastTouchID == TouchConvertedReport.CurrentFirstTouchID)
                         Pointer.Translate(pos);
-                    }
 
                     _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
                 }
@@ -71,9 +86,11 @@ namespace OTD.EnhancedOutputMode.Output
                     _lastPos = tabletReport.Position;
 
                     if (Transpose(tabletReport) is Vector2 pos)
-                    {
                         Pointer.Translate(pos);
-                    }
+
+                    // Restart the stopwatch since the pen is in range
+                    if (TouchSettings.DisableWhenPenInRange)
+                        _penStopwatch.Restart();
                 }
             }
             else if (report is IAuxReport auxReport)
