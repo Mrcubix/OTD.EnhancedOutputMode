@@ -25,7 +25,7 @@ To enable touch, you can follow these steps:
 - Go to the `Tools` tab in OpenTabletDriver,
 - Click on Touch Toggle, tick `Enable Touch Toggle` & `Toggle Touch`,
 
-![Touch Toggle](/images/Touch-toggle.png)
+![Touch Toggle](/images/Touch-Toggle.png)
 
 Just doing this might not be enough if the touch resolution of your tablet is different from the Wacom CTH tablets,
 In which case you will need to set these values manually using the following steps:
