@@ -22,16 +22,15 @@
 Touch is disabled by default, to prevent any conflict of inputs between the pen and your hand.
 To enable touch, you can follow these steps:
 
-- Go to the `Tools` tab in OpenTabletDriver,
-- Click on Touch Toggle, tick `Enable Touch Toggle` & `Toggle Touch`,
+- Go to the `Tools` tab in OpenTabletDriver (`Filters` in 0.5.3.3),
+- Click on Touch Settings, tick `Enable Touch Settings` & `Toggle Touch`,
 
-![Touch Toggle](/images/Touch-Toggle.png)
+![Touch Settings](/images/Touch-Settings.png)
 
 Just doing this might not be enough if the touch resolution of your tablet is different from the Wacom CTH tablets,
 In which case you will need to set these values manually using the following steps:
 
-- Click on `Touch Settings`,
-- From there, you might want to open the debugger (Tablet -> Tablet Debugger in the top menu bar),
+- You might want to open the debugger (Tablet -> Tablet Debugger in the top menu bar),
 - Move your finger slowly to the bottom right of the tablet until the touch values stop changing, 
 - Take note of the X and Y values,
 - Write these values in `MaxX` & `MaxY` in the `Touch Settings` plugin.
