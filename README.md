@@ -6,6 +6,11 @@
 - Add support for touch for supported tablets
 - Has support for the base OpenTabletDriver output modes as well as VoiD's (Windows Ink & Vmulti)
 
+## Supported Versions
+
+- OpenTabletDriver v0.5.3.3
+- OpenTabletDriver v0.6.4.0
+
 ## Installation
 
 1. Download the latest release from the [releases page](https://github.com/Mrcubix/OTD.EnhancedOutputMode/releases/latest)
@@ -32,10 +37,9 @@ In which case you will need to set these values manually using the following ste
 - Write these values in `MaxX` & `MaxY` in the `Touch Settings` plugin.
 - Save & Apply and it should work as expected.
 
-## Supported Versions
+## What about Touch Gestures
 
-- OpenTabletDriver v0.5.3.3
-- OpenTabletDriver v0.6.4.0
+For Touch Gestures, see the [Touch Gestures Plugin](https://github.com/Mrcubix/Touch-Gestures) (Available via the Plugin Manager)
 
 ## Touch Supported Tablets (Tested)
 
