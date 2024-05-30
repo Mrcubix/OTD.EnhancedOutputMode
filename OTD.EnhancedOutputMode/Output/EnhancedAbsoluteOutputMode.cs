@@ -9,6 +9,7 @@ using OpenTabletDriver.Plugin.Output;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
+using OpenTabletDriver.Plugin.Timing;
 using OTD.EnhancedOutputMode.Lib.Interface;
 using OTD.EnhancedOutputMode.Lib.Tools;
 using OTD.EnhancedOutputMode.Tablet;
@@ -18,24 +19,29 @@ namespace OTD.EnhancedOutputMode.Output
     [PluginName("Enhanced Absolute Mode")]
     public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerOutputMode<IAbsolutePointer>
     {
-        private IList<IFilter> filters, preFilters, postFilters;
-        private Vector2 min, max;
-        private bool _firstReport = true;
         private ITabletReport _convertedReport = new TouchConvertedReport();
+        private HPETDeltaStopwatch _penStopwatch = new(true);
+        private IList<IFilter> filters, preFilters, postFilters;
+        private bool _firstReport = true;
         private Vector2 _lastPos;
+        private Vector2 min, max;
 
         protected Matrix3x2 touchTransformationMatrix;
 
         public override IAbsolutePointer Pointer => SystemInterop.AbsolutePointer;
 
-        public IList<IGateFilter> GateFilters { get; set; } = Array.Empty<IGateFilter>();
-        public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
+        public IList<IGateFilter> GateFilters { get; private set; } = Array.Empty<IGateFilter>();
+        public IList<IAuxFilter> AuxFilters { get; private set; } = Array.Empty<IAuxFilter>();
+        public TouchSettings TouchSettings { get; private set; }
 
         #region Initialization
 
         private void Initialize()
         {
+            if (Filters == null) return;
+
             this.filters = Filters ?? Array.Empty<IFilter>();
+            TouchSettings = TouchSettings.Instance ?? TouchSettings.Default;
 
             // Gather custom filters
             GateFilters = Filters.OfType<IGateFilter>().ToList();
@@ -50,7 +56,7 @@ namespace OTD.EnhancedOutputMode.Output
                 this.preFilters = Filters.Where(t => t.FilterStage == FilterStage.PreTranspose).ToList();
             else
                 this.preFilters = Filters.Where(t => t.FilterStage == FilterStage.PreTranspose || t.FilterStage == FilterStage.PreInterpolate).ToList();
-                
+
             this.postFilters = filters.Where(t => t.FilterStage == FilterStage.PostTranspose).ToList();
 
             UpdateTouchTransformMatrix();
@@ -65,7 +71,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         protected void UpdateTouchTransformMatrix()
         {
-            if (Input != null && Output != null && Tablet?.Digitizer != null)
+            if (Input != null && Output != null && Tablet?.Digitizer != null && TouchSettings != null)
                 this.touchTransformationMatrix = CalculateTouchTransformation(Input, Output, Tablet.Digitizer);
 
             var halfDisplayWidth = Output?.Width / 2 ?? 0;
@@ -80,12 +86,12 @@ namespace OTD.EnhancedOutputMode.Output
             this.max = new Vector2(maxX, maxY);
         }
 
-        protected static Matrix3x2 CalculateTouchTransformation(Area input, Area output, DigitizerIdentifier tablet)
+        protected Matrix3x2 CalculateTouchTransformation(Area input, Area output, DigitizerIdentifier tablet)
         {
             // Convert raw tablet data to millimeters
             var res = Matrix3x2.CreateScale(
-                tablet.Width / TouchSettings.maxX,
-                tablet.Height / TouchSettings.maxY);
+                tablet.Width / TouchSettings.MaxX,
+                tablet.Height / TouchSettings.MaxY);
 
             // Translate to the center of input area
             res *= Matrix3x2.CreateTranslation(
@@ -117,22 +123,8 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (report is ITouchReport touchReport)
             {
-                if (!TouchSettings.istouchToggled) return;
-
-                (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
-
-                if (ShouldReport(report, ref _convertedReport))
-                {
-                    if (_convertedReport.ReportID == 0)
-                        return;
-
-                    _lastPos = _convertedReport.Position;
-
-                    if (TransposeTouch(_convertedReport) is Vector2 pos)
-                    {
-                        Pointer.SetPosition(pos);
-                    }
-                }
+                if (HandleTouch(report, touchReport) == false)
+                    return;
             }
             else if (report is ITabletReport tabletReport)
             {
@@ -156,6 +148,31 @@ namespace OTD.EnhancedOutputMode.Output
             }
         }
 
+        protected virtual bool HandleTouch(IDeviceReport report, ITouchReport touchReport)
+        {
+            if (!TouchSettings.IsTouchToggled) return false;
+
+            // Check if the pen was in range recently and skip report if it was
+            if (TouchSettings.DisableWhenPenInRange)
+                if (_penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
+                    return false;
+
+            (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
+
+            if (ShouldReport(report, ref _convertedReport))
+            {
+                if (_convertedReport.ReportID == 0)
+                    return false;
+
+                _lastPos = _convertedReport.Position;
+
+                if (TransposeTouch(_convertedReport) is Vector2 pos)
+                    Pointer.SetPosition(pos);
+            }
+
+            return true;
+        }
+
         protected bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
         {
             foreach (var gateFilter in this.GateFilters)
@@ -164,7 +181,6 @@ namespace OTD.EnhancedOutputMode.Output
 
             return true;
         }
-            
 
         #endregion
 
