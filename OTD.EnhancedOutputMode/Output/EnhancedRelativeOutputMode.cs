@@ -49,7 +49,7 @@ namespace OTD.EnhancedOutputMode.Output
             // we don't want to initialize again
             _firstReport = false;
         }
-        
+
         public override void Read(IDeviceReport report)
         {
             if (_firstReport && Filters != null)
@@ -57,24 +57,8 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (report is ITouchReport touchReport)
             {
-                if (!TouchSettings.IsTouchToggled) return;
-
-                // Check if the pen was in range recently and skip report if it was
-                if (TouchSettings.DisableWhenPenInRange)
-                    if (_penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
-                        return;
-                
-                (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
-
-                if (ShouldReport(report, ref _convertedReport))
-                {
-                    _lastPos = _convertedReport.Position;
-
-                    if (Transpose(_convertedReport) is Vector2 pos && _lastTouchID == TouchConvertedReport.CurrentFirstTouchID)
-                        Pointer.Translate(pos);
-
-                    _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
-                }
+                if (HandleTouch(report, touchReport) == false)
+                    return;
             }
             else if (report is ITabletReport tabletReport)
             {
@@ -100,12 +84,36 @@ namespace OTD.EnhancedOutputMode.Output
             }
         }
 
+        protected virtual bool HandleTouch(IDeviceReport report, ITouchReport touchReport)
+        {
+            if (!TouchSettings.IsTouchToggled) return false;
+
+            // Check if the pen was in range recently and skip report if it was
+            if (TouchSettings.DisableWhenPenInRange)
+                if (_penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
+                    return false;
+
+            (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
+
+            if (ShouldReport(report, ref _convertedReport))
+            {
+                _lastPos = _convertedReport.Position;
+
+                if (Transpose(_convertedReport) is Vector2 pos && _lastTouchID == TouchConvertedReport.CurrentFirstTouchID)
+                    Pointer.Translate(pos);
+
+                _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
+            }
+
+            return true;
+        }
+
         protected bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
         {
             foreach (var gateFilter in this.GateFilters)
                 if (!gateFilter.Pass(report, ref tabletreport))
                     return false;
-                    
+
             return true;
         }
     }

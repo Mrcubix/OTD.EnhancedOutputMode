@@ -56,7 +56,7 @@ namespace OTD.EnhancedOutputMode.Output
                 this.preFilters = Filters.Where(t => t.FilterStage == FilterStage.PreTranspose).ToList();
             else
                 this.preFilters = Filters.Where(t => t.FilterStage == FilterStage.PreTranspose || t.FilterStage == FilterStage.PreInterpolate).ToList();
-                
+
             this.postFilters = filters.Where(t => t.FilterStage == FilterStage.PostTranspose).ToList();
 
             UpdateTouchTransformMatrix();
@@ -123,25 +123,8 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (report is ITouchReport touchReport)
             {
-                if (!TouchSettings.IsTouchToggled) return;
-
-                // Check if the pen was in range recently and skip report if it was
-                if (TouchSettings.DisableWhenPenInRange)
-                    if (_penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
-                        return;
-
-                (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
-
-                if (ShouldReport(report, ref _convertedReport))
-                {
-                    if (_convertedReport.ReportID == 0)
-                        return;
-
-                    _lastPos = _convertedReport.Position;
-
-                    if (TransposeTouch(_convertedReport) is Vector2 pos)
-                        Pointer.SetPosition(pos);
-                }
+                if (HandleTouch(report, touchReport) == false)
+                    return;
             }
             else if (report is ITabletReport tabletReport)
             {
@@ -165,6 +148,31 @@ namespace OTD.EnhancedOutputMode.Output
             }
         }
 
+        protected virtual bool HandleTouch(IDeviceReport report, ITouchReport touchReport)
+        {
+            if (!TouchSettings.IsTouchToggled) return false;
+
+            // Check if the pen was in range recently and skip report if it was
+            if (TouchSettings.DisableWhenPenInRange)
+                if (_penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
+                    return false;
+
+            (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
+
+            if (ShouldReport(report, ref _convertedReport))
+            {
+                if (_convertedReport.ReportID == 0)
+                    return false;
+
+                _lastPos = _convertedReport.Position;
+
+                if (TransposeTouch(_convertedReport) is Vector2 pos)
+                    Pointer.SetPosition(pos);
+            }
+
+            return true;
+        }
+
         protected bool ShouldReport(IDeviceReport report, ref ITabletReport tabletreport)
         {
             foreach (var gateFilter in this.GateFilters)
@@ -173,7 +181,7 @@ namespace OTD.EnhancedOutputMode.Output
 
             return true;
         }
-            
+
 
         #endregion
 
