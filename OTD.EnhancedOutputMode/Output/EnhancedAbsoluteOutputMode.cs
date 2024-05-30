@@ -182,7 +182,6 @@ namespace OTD.EnhancedOutputMode.Output
             return true;
         }
 
-
         #endregion
 
         #region Touch Transposition
