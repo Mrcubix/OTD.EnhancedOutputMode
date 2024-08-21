@@ -28,14 +28,16 @@ namespace OTD.EnhancedOutputMode.Output
 
         protected Matrix3x2 _touchTransformationMatrix;
 
-        public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
-
 #pragma warning disable CS8618
 
         [Resolved]
         public override IRelativePointer Pointer { set; get; }
 
 #pragma warning restore CS8618
+
+        public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
+
+        public TouchSettings TouchSettings { get; private set; } = TouchSettings.Default;
 
         #region Initialization
 
@@ -73,7 +75,7 @@ namespace OTD.EnhancedOutputMode.Output
         {
             if (deviceReport is ITouchReport touchReport)
             {
-                if (!_touchSettings.IsTouchToggled) return;
+                if (_touchSettings == null || !_touchSettings.IsTouchToggled) return;
 
                 // Check if the pen was in range recently and skip report if it was
                 if (_touchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < _touchSettings.PenResetTimeSpan)

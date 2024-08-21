@@ -149,7 +149,7 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (report is ITouchReport touchReport)
             {
-                if (!TouchSettings.IsTouchToggled) return;
+                if (TouchSettings == null || !TouchSettings.IsTouchToggled) return;
 
                 // Check if the pen was in range recently and skip report if it was
                 if (_touchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < _touchSettings.PenResetTimeSpan)
