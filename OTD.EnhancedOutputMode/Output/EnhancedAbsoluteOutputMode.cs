@@ -72,7 +72,7 @@ namespace OTD.EnhancedOutputMode.Output
         protected void UpdateTouchTransformMatrix()
         {
             if (Input != null && Output != null && Tablet?.Digitizer != null && TouchSettings != null)
-                this.touchTransformationMatrix = CalculateTouchTransformation(Input, Output, Tablet.Digitizer);
+                this.touchTransformationMatrix = CalculateTouchTransformation(Input, Output, Tablet.Digitizer, TouchSettings);
 
             var halfDisplayWidth = Output?.Width / 2 ?? 0;
             var halfDisplayHeight = Output?.Height / 2 ?? 0;
@@ -86,12 +86,12 @@ namespace OTD.EnhancedOutputMode.Output
             this.max = new Vector2(maxX, maxY);
         }
 
-        protected Matrix3x2 CalculateTouchTransformation(Area input, Area output, DigitizerIdentifier tablet)
+        protected static Matrix3x2 CalculateTouchTransformation(Area input, Area output, DigitizerIdentifier tablet, TouchSettings settings)
         {
             // Convert raw tablet data to millimeters
             var res = Matrix3x2.CreateScale(
-                tablet.Width / TouchSettings.MaxX,
-                tablet.Height / TouchSettings.MaxY);
+                tablet.Width / settings.MaxX,
+                tablet.Height / settings.MaxY);
 
             // Translate to the center of input area
             res *= Matrix3x2.CreateTranslation(
@@ -150,7 +150,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         protected virtual bool HandleTouch(IDeviceReport report, ITouchReport touchReport)
         {
-            if (!TouchSettings.IsTouchToggled) return false;
+            if (TouchSettings == null || !TouchSettings.IsTouchToggled) return false;
 
             // Check if the pen was in range recently and skip report if it was
             if (TouchSettings.DisableWhenPenInRange)
@@ -186,7 +186,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         #region Touch Transposition
 
-        protected Vector2? TransposeTouch(ITabletReport report)
+        public Vector2? TransposeTouch(ITabletReport report)
         {
             var pos = new Vector2(report.Position.X, report.Position.Y);
 

@@ -49,9 +49,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tools
         [BooleanProperty("Toggle Touch", ""),
          DefaultPropertyValue(true),
          ToolTip("OTD.EnhancedOutputMode:\n\n" +
-                 "When Enabled, touch reports will be handled in Enhanced output modes."
-                )
-        ]
+                 "When Enabled, touch reports will be handled in Enhanced output modes.")]
         public bool IsTouchToggled { get; set; }
 
         [BooleanProperty("Disable When Pen in Range", ""),

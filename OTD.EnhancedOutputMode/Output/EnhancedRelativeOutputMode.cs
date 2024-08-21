@@ -86,7 +86,7 @@ namespace OTD.EnhancedOutputMode.Output
 
         protected virtual bool HandleTouch(IDeviceReport report, ITouchReport touchReport)
         {
-            if (!TouchSettings.IsTouchToggled) return false;
+            if (TouchSettings == null || !TouchSettings.IsTouchToggled) return false;
 
             // Check if the pen was in range recently and skip report if it was
             if (TouchSettings.DisableWhenPenInRange)
