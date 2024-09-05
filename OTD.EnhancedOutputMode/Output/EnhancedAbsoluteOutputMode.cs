@@ -135,19 +135,14 @@ namespace OTD.EnhancedOutputMode.Output
 
         public override void Read(IDeviceReport deviceReport)
         {
+            if (!_initialized)
+                Initialize();
+
             if (deviceReport is ITabletReport) // Restart the pen stopwatch when a pen report is received
                 if (_touchSettings.DisableWhenPenInRange)
                     _penStopwatch.Restart();
 
-            base.Read(deviceReport);
-        }
-
-        public override void Consume(IDeviceReport report)
-        {
-            if (!_initialized)
-                Initialize();
-
-            if (report is ITouchReport touchReport)
+            if (deviceReport is ITouchReport touchReport)
             {
                 if (TouchSettings == null || !TouchSettings.IsTouchToggled) return;
 
@@ -163,8 +158,8 @@ namespace OTD.EnhancedOutputMode.Output
                     base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it
                 }
             }
-
-            base.Consume(report);
+            
+            base.Read(deviceReport);
         }
 
         protected override void OnOutput(IDeviceReport report)

@@ -11,8 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver/OpenTabletDriver.csproj" />
-    <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Desktop/OpenTabletDriver.Desktop.csproj" />
+    <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Desktop/OpenTabletDriver.Desktop.csproj" Nullable="disable" />
 
     <ProjectReference Include="../.modules/VoiDPlugins/src/VoiDPlugins.Library/VMulti/VMulti.csproj" />
     <ProjectReference Include="../.modules/VoiDPlugins/src/VoiDPlugins.Library/VoiD/VoiD.csproj" />
