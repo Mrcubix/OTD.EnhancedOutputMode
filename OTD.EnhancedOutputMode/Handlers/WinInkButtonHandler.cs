@@ -38,9 +38,9 @@ namespace OTD.EnhancedOutputMode.Handlers
             }
             catch
             {
-                Log.WriteNotify("WinInk",
-                          "Windows Ink bindings are being used without an active Windows Ink output mode.",
-                          LogLevel.Error);
+                Log.WriteNotify("Enhanced Windows Ink Bindings",
+                                "Windows Ink bindings are being used without an active Enhanced Windows Ink Output Mode.",
+                                LogLevel.Error);
             }
         }
 

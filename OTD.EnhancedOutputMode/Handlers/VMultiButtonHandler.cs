@@ -39,8 +39,8 @@ namespace OTD.EnhancedOutputMode.Handlers
             }
             catch
             {
-                Log.Write("VMulti",
-                          "VMulti bindings are being used without an active VMulti output mode.",
+                Log.Write("Enhanced VMulti Bindings",
+                          "VMulti bindings are being used without an active Enhanced VMulti Output Mode.",
                           LogLevel.Error);
             }
         }
