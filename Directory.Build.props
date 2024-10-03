@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <NoWarn>$(NoWarn); NETSDK1138</NoWarn>
+  </PropertyGroup>
+</Project>
