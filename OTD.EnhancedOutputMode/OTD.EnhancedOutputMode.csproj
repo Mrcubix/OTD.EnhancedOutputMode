@@ -4,6 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>enable</Nullable>
+    <DisableTransitiveProjectReferences>true</DisableTransitiveProjectReferences>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
@@ -11,7 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Desktop/OpenTabletDriver.Desktop.csproj" Nullable="disable" />
+    <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver/OpenTabletDriver.csproj" Private="False" />
+    <ProjectReference Include="../.modules/OpenTabletDriver/OpenTabletDriver.Plugin/OpenTabletDriver.Plugin.csproj" Private="False" />
 
     <ProjectReference Include="../.modules/VoiDPlugins/src/VoiDPlugins.Library/VMulti/VMulti.csproj" />
     <ProjectReference Include="../.modules/VoiDPlugins/src/VoiDPlugins.Library/VoiD/VoiD.csproj" />
