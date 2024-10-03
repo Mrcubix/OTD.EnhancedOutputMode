@@ -13,7 +13,7 @@ using OpenTabletDriver.Plugin.Tablet.Touch;
 using OpenTabletDriver.Plugin.Timing;
 using OTD.EnhancedOutputMode.Lib.Interface;
 using OTD.EnhancedOutputMode.Lib.Tools;
-using OTD.EnhancedOutputMode.Tablet;
+using OTD.EnhancedOutputMode.Lib.Tablet;
 
 namespace OTD.EnhancedOutputMode.Output
 {

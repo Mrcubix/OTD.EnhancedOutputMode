@@ -1,12 +1,13 @@
+using System;
 using System.Linq;
 using System.Numerics;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
 
-namespace OTD.EnhancedOutputMode.Tablet
+namespace OTD.EnhancedOutputMode.Lib.Tablet
 {
-    public class TouchConvertedReport : ITabletReport
+    public class TouchConvertedReport : ITabletReport//, ITouchReport
     {
         public static int CurrentFirstTouchID { get; set; } = -1;
 
@@ -16,6 +17,8 @@ namespace OTD.EnhancedOutputMode.Tablet
         public bool[] PenButtons { get; set; }
         public bool InRange { get; set; }
 
+        //public TouchPoint[] Touches { get; set; }
+
         public TouchConvertedReport(IDeviceReport report, Vector2 lastPos)
         {
             Raw = report.Raw;
@@ -23,6 +26,7 @@ namespace OTD.EnhancedOutputMode.Tablet
 
             if (report is ITouchReport touchreport)
             {
+                //Touches = touchreport.Touches;
                 HandleReport(touchreport, lastPos);
             }
             else if (report is ITabletReport tabletreport)
@@ -30,6 +34,13 @@ namespace OTD.EnhancedOutputMode.Tablet
                 Position = tabletreport.Position;
                 Pressure = tabletreport.Pressure;
                 PenButtons = tabletreport.PenButtons;
+
+                /*var touchPoint = new TouchPoint()
+                {
+                    Position = tabletreport.Position,
+                };
+                Touches = new TouchPoint[] { touchPoint };*/
+
                 Log.Write("OTD.EnhancedOutputMode", "Report is ITabletReport when ITouchReport is expected. \nWarning occured in OpenTabletDriver.EnhancedOutputMode.Tablet.TouchConvertedReport", LogLevel.Warning);
             }
         }
@@ -38,14 +49,16 @@ namespace OTD.EnhancedOutputMode.Tablet
         {
             Raw = report.Raw;
             PenButtons = new bool[] {};
+            //Touches = report.Touches;
             
             HandleReport(report, lastPos);
         }
 
         public TouchConvertedReport()
         {
-            Raw = new byte[] {};
-            PenButtons = new bool[] {};
+            Raw = Array.Empty<byte>();
+            PenButtons = Array.Empty<bool>();
+            //Touches = Array.Empty<TouchPoint>();
         }
 
         /// <summary>
@@ -58,7 +71,9 @@ namespace OTD.EnhancedOutputMode.Tablet
         /// </remarks>
         public void HandleReport(ITouchReport touchReport, Vector2 lastPos)
         {
-            TouchPoint? firstTouch = null;
+            TouchPoint firstTouch = null;
+
+            //Touches = touchReport.Touches;
 
             // Touch ID stays the same until the touch is released
             if (CurrentFirstTouchID != -1)
