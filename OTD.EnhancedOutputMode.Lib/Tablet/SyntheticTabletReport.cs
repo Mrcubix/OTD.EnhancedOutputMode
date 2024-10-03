@@ -1,7 +1,7 @@
 using System.Numerics;
 using OpenTabletDriver.Plugin.Tablet;
 
-namespace OTD.EnhancedOutputMode.Tablet
+namespace OTD.EnhancedOutputMode.Lib.Tablet
 {
     public class SyntheticTabletReport : ITabletReport
     {

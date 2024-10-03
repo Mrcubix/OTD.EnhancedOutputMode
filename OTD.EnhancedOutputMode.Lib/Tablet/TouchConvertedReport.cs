@@ -3,7 +3,7 @@ using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Tablet;
 using OpenTabletDriver.Plugin.Tablet.Touch;
 
-namespace OTD.EnhancedOutputMode.Tablet
+namespace OTD.EnhancedOutputMode.Lib.Tablet
 {
     public class TouchConvertedReport: ITabletReport
     {
