@@ -26,7 +26,7 @@ namespace OTD.EnhancedOutputMode.Output
         private int _lastTouchID = -1;
         private Vector2 _lastPos;
 
-        protected Matrix3x2 _touchTransformationMatrix;
+        public Matrix3x2 TouchTransformationMatrix { get; protected set; }
 
 #pragma warning disable CS8618
 
@@ -55,6 +55,8 @@ namespace OTD.EnhancedOutputMode.Output
             // Initialize filters that require initialization
             foreach (var filter in Elements.OfType<IInitialize>())
                 filter.Initialize();
+
+            TouchTransformationMatrix = TransformationMatrix;
 
             _initialized = true;
         }

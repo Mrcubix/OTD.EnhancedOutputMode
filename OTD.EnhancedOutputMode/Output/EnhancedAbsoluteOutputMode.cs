@@ -28,7 +28,7 @@ namespace OTD.EnhancedOutputMode.Output
         private Vector2 min, max;
         private Vector2 _lastPos;
 
-        protected Matrix3x2 _touchTransformationMatrix;
+        public Matrix3x2 TouchTransformationMatrix { get; protected set; }
 
 #pragma warning disable CS8618
 
@@ -105,7 +105,7 @@ namespace OTD.EnhancedOutputMode.Output
                     return;
 
                 // Calculate transformation matrix for touch
-                _touchTransformationMatrix = CreateTouchTransformationMatrix(absoluteMode);
+                TouchTransformationMatrix = CreateTouchTransformationMatrix(absoluteMode);
 
                 _initialized = true;
             }
@@ -183,7 +183,7 @@ namespace OTD.EnhancedOutputMode.Output
 
             // Apply transformation
             if (report is TouchConvertedReport)
-                pos = Vector2.Transform(report.Position, this._touchTransformationMatrix);
+                pos = Vector2.Transform(report.Position, this.TouchTransformationMatrix);
             else
                 pos = Vector2.Transform(report.Position, this.TransformationMatrix);
 
