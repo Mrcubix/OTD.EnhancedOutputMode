@@ -26,7 +26,7 @@ namespace OTD.EnhancedOutputMode.Output
         private Vector2 _lastPos;
         private Vector2 min, max;
 
-        protected Matrix3x2 touchTransformationMatrix;
+        public  Matrix3x2 TouchTransformationMatrix { get; private set; }
 
         public override IAbsolutePointer Pointer => SystemInterop.AbsolutePointer;
 
@@ -72,7 +72,7 @@ namespace OTD.EnhancedOutputMode.Output
         protected void UpdateTouchTransformMatrix()
         {
             if (Input != null && Output != null && Tablet?.Digitizer != null && TouchSettings != null)
-                this.touchTransformationMatrix = CalculateTouchTransformation(Input, Output, Tablet.Digitizer, TouchSettings);
+                this.TouchTransformationMatrix = CalculateTouchTransformation(Input, Output, Tablet.Digitizer, TouchSettings);
 
             var halfDisplayWidth = Output?.Width / 2 ?? 0;
             var halfDisplayHeight = Output?.Height / 2 ?? 0;
@@ -195,7 +195,7 @@ namespace OTD.EnhancedOutputMode.Output
                 pos = filter.Filter(pos);
 
             // Apply transformation
-            pos = Vector2.Transform(pos, this.touchTransformationMatrix);
+            pos = Vector2.Transform(pos, this.TouchTransformationMatrix);
 
             // Clipping to display bounds
             var clippedPoint = Vector2.Clamp(pos, this.min, this.max);
