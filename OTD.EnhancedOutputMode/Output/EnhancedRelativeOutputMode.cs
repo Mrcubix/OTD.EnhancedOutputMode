@@ -48,20 +48,18 @@ namespace OTD.EnhancedOutputMode.Output
             foreach (var filter in Filters.OfType<IInitialize>())
                 filter.Initialize();
 
-            UpdateTransformMatrix(TouchSettings);
-
             // we don't want to initialize again
             _firstReport = false;
         }
 
-        private void UpdateTransformMatrix(TouchSettings touchSettings)
+        private void UpdateTransformMatrix()
         {
             this.TouchTransformationMatrix = Matrix3x2.CreateRotation(
                 (float)(-Rotation * System.Math.PI / 180));
 
             this.TouchTransformationMatrix *= Matrix3x2.CreateScale(
-                Sensitivity.X * ((Tablet?.Digitizer?.Width / touchSettings?.MaxX) ?? 0.01f),
-                Sensitivity.Y * ((Tablet?.Digitizer?.Height / touchSettings?.MaxY) ?? 0.01f));
+                Sensitivity.X * ((Tablet?.Digitizer?.Width / Tablet?.Digitizer?.MaxX) ?? 0.01f),
+                Sensitivity.Y * ((Tablet?.Digitizer?.Height / Tablet?.Digitizer?.MaxY) ?? 0.01f));
         }
 
         public override void Read(IDeviceReport report)
