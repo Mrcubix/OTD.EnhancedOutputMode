@@ -130,11 +130,8 @@ namespace OTD.EnhancedOutputMode.Output
             if (report is not TouchConvertedReport)
                 return base.Transform(report);
 
-            Vector2 pos = report.Position;
-            Vector2? delta;
-
-            pos = Vector2.Transform(pos, TouchTransformationMatrix);
-            delta = pos - _lastTransformedTouchPos;
+            var pos = Vector2.Transform(report.Position, TouchTransformationMatrix);
+            var delta = pos - _lastTransformedTouchPos;
             _lastTransformedTouchPos = pos;
 
             report.Position = delta.GetValueOrDefault();
