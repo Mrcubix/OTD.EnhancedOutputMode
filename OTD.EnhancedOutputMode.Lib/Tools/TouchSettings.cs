@@ -61,6 +61,12 @@ namespace OTD.EnhancedOutputMode.Lib.Tools
 
         public TimeSpan PenResetTimeSpan => penResetTime;
 
+        [BooleanProperty("Match Pen Sensibility in Relative Mode", ""),
+         DefaultPropertyValue(false),
+         ToolTip("OTD.EnhancedOutputMode:\n\n" +
+                 "When Enabled, the touch sensitivity will match to the sensitivity of the pen in Relative output mode.")]
+        public bool MatchPenSensibilityInRelativeMode { get; set; }
+
         [Property("Max X"),
          DefaultPropertyValue(4095),
          ToolTip("OTD.EnhancedOutputMode:\n\n" +
