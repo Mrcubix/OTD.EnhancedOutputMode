@@ -26,7 +26,6 @@ namespace OTD.EnhancedOutputMode.Output
         private bool skipReport = false;
         private int _lastTouchID = -1;
         private Vector2? _lastTransformedTouchPos;
-        private Vector2? _lastTransformedAbsolutePos;
         private Vector2 _lastPos;
 
         public Matrix3x2 TouchTransformationMatrix { get; protected set; }
