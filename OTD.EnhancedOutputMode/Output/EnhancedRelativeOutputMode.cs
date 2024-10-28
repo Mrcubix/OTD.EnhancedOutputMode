@@ -39,7 +39,11 @@ namespace OTD.EnhancedOutputMode.Output
 
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
 
-        public TouchSettings TouchSettings { get; private set; } = TouchSettings.Default;
+        public TouchSettings TouchSettings
+        {
+            get => _touchSettings;
+            set => _touchSettings = value ?? TouchSettings.Default;
+        }
 
         #region Initialization
 
@@ -48,7 +52,7 @@ namespace OTD.EnhancedOutputMode.Output
             if (Elements == null)
                 return;
 
-            _touchSettings = Elements.OfType<TouchSettings>().FirstOrDefault() ?? TouchSettings.Default;
+            TouchSettings = Elements.OfType<TouchSettings>().FirstOrDefault() ?? TouchSettings.Default;
 
             // Gather custom filters
             // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
@@ -60,7 +64,7 @@ namespace OTD.EnhancedOutputMode.Output
 
             TouchTransformationMatrix = TransformationMatrix;
 
-            if (TouchSettings.MatchPenSensibilityInRelativeMode)
+            if (_touchSettings.MatchPenSensibilityInRelativeMode)
                 UpdateTouchTransformMatrix();
 
             _initialized = true;
@@ -70,8 +74,8 @@ namespace OTD.EnhancedOutputMode.Output
         {
             // Pen & Touch digitizer suffer from a difference in resolution, 
             // resulting in different speeds for the same sensitivity.
-            var XMultiplier = Tablet.Properties.Specifications.Digitizer.MaxX / TouchSettings.MaxX;
-            var YMultiplier = Tablet.Properties.Specifications.Digitizer.MaxY / TouchSettings.MaxY;
+            var XMultiplier = Tablet.Properties.Specifications.Digitizer.MaxX / _touchSettings.MaxX;
+            var YMultiplier = Tablet.Properties.Specifications.Digitizer.MaxY / _touchSettings.MaxY;
 
             // This should achieve about the same speed as the pen
             TouchTransformationMatrix = TransformationMatrix * Matrix3x2.CreateScale(XMultiplier, YMultiplier);
