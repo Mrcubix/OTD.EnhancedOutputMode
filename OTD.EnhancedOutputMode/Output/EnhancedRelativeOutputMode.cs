@@ -19,11 +19,13 @@ namespace OTD.EnhancedOutputMode.Output
     public class EnhancedRelativeOutputMode : RelativeOutputMode, IPointerProvider<IRelativePointer>
     {
         private readonly ITabletReport _convertedReport = new TouchConvertedReport();
+        private readonly HPETDeltaStopwatch _touchStopwatch = new(true);
         private readonly HPETDeltaStopwatch _penStopwatch = new(true);
         private TouchSettings _touchSettings = TouchSettings.Default;
         private bool _initialized = false;
         private bool skipReport = false;
         private int _lastTouchID = -1;
+        private Vector2? _lastTransformedTouchPos;
         private Vector2 _lastPos;
 
         public Matrix3x2 TouchTransformationMatrix { get; protected set; }
@@ -37,7 +39,11 @@ namespace OTD.EnhancedOutputMode.Output
 
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
 
-        public TouchSettings TouchSettings { get; private set; } = TouchSettings.Default;
+        public TouchSettings TouchSettings
+        {
+            get => _touchSettings;
+            set => _touchSettings = value ?? TouchSettings.Default;
+        }
 
         #region Initialization
 
@@ -46,7 +52,7 @@ namespace OTD.EnhancedOutputMode.Output
             if (Elements == null)
                 return;
 
-            _touchSettings = Elements.OfType<TouchSettings>().FirstOrDefault() ?? TouchSettings.Default;
+            TouchSettings = Elements.OfType<TouchSettings>().FirstOrDefault() ?? TouchSettings.Default;
 
             // Gather custom filters
             // TODO: someone replace this system with the IPositionedPipelineElement bullshit somehow
@@ -58,7 +64,21 @@ namespace OTD.EnhancedOutputMode.Output
 
             TouchTransformationMatrix = TransformationMatrix;
 
+            if (_touchSettings.MatchPenSensibilityInRelativeMode)
+                UpdateTouchTransformMatrix();
+
             _initialized = true;
+        }
+
+        private void UpdateTouchTransformMatrix()
+        {
+            // Pen & Touch digitizer suffer from a difference in resolution, 
+            // resulting in different speeds for the same sensitivity.
+            var XMultiplier = Tablet.Properties.Specifications.Digitizer.MaxX / _touchSettings.MaxX;
+            var YMultiplier = Tablet.Properties.Specifications.Digitizer.MaxY / _touchSettings.MaxY;
+
+            // This should achieve about the same speed as the pen
+            TouchTransformationMatrix = TransformationMatrix * Matrix3x2.CreateScale(XMultiplier, YMultiplier);
         }
 
         #endregion
@@ -89,6 +109,7 @@ namespace OTD.EnhancedOutputMode.Output
                 if (_lastTouchID != TouchConvertedReport.CurrentFirstTouchID && TouchConvertedReport.CurrentFirstTouchID != -1)
                 {
                     _lastPos = _convertedReport.Position;
+                    _lastTransformedTouchPos = null;
                     skipReport = true;
                 }
 
@@ -99,14 +120,26 @@ namespace OTD.EnhancedOutputMode.Output
                     base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it
                 else
                     skipReport = false;
-
-                _lastPos = _convertedReport.Position;
             }
             else if (deviceReport is IAbsolutePositionReport) // Restart the pen stopwatch when a pen report is received
                 if (_touchSettings.DisableWhenPenInRange)
                     _penStopwatch.Restart();
 
             base.Read(deviceReport);
+        }
+
+        protected override IAbsolutePositionReport Transform(IAbsolutePositionReport report)
+        {
+            if (report is not TouchConvertedReport)
+                return base.Transform(report);
+
+            var pos = Vector2.Transform(report.Position, TouchTransformationMatrix);
+            var delta = pos - _lastTransformedTouchPos;
+            _lastTransformedTouchPos = pos;
+
+            report.Position = delta.GetValueOrDefault();
+
+            return report;
         }
 
         protected override void OnOutput(IDeviceReport report)
