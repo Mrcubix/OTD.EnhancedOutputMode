@@ -23,7 +23,7 @@ namespace OTD.EnhancedOutputMode.Output
         private readonly HPETDeltaStopwatch _penStopwatch = new(true);
         private TouchSettings _touchSettings = TouchSettings.Default;
         private bool _initialized = false;
-        private bool skipReport = false;
+        private bool _skipReport = false;
         private int _lastTouchID = -1;
         private Vector2? _lastTransformedTouchPos;
         private Vector2 _lastPos;
@@ -106,20 +106,30 @@ namespace OTD.EnhancedOutputMode.Output
                 (_convertedReport as TouchConvertedReport)!.HandleReport(touchReport, _lastPos);
 
                 // The touch point that was moving the cursor changed, skip this report as it would cause a large delta
-                if (_lastTouchID != TouchConvertedReport.CurrentFirstTouchID && TouchConvertedReport.CurrentFirstTouchID != -1)
+                if (_lastTouchID != TouchConvertedReport.CurrentFirstTouchID)
                 {
-                    _lastPos = _convertedReport.Position;
-                    _lastTransformedTouchPos = null;
-                    skipReport = true;
+                    if (TouchConvertedReport.CurrentFirstTouchID == -1)
+                        base.Read(_convertedReport);
+                    else
+                    {
+                        _lastPos = _convertedReport.Position;
+                        _skipReport = true;
+                    }
                 }
 
                 _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
 
                 // Skip the report if the pressure is 0 or if the touch point changed
-                if (_convertedReport.Pressure != 0 && skipReport == false)
+                if (_convertedReport.Pressure != 0 && _skipReport == false)
+                {
+                    _lastPos = _convertedReport.Position;
                     base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it
-                else
-                    skipReport = false;
+                }
+                else if (_skipReport)
+                {
+                    _lastTransformedTouchPos = null;
+                    _skipReport = false;
+                }
             }
             else if (deviceReport is IAbsolutePositionReport) // Restart the pen stopwatch when a pen report is received
                 if (_touchSettings.DisableWhenPenInRange)
