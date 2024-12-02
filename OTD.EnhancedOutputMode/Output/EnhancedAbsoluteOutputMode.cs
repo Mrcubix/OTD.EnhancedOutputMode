@@ -25,6 +25,7 @@ namespace OTD.EnhancedOutputMode.Output
         private TouchSettings _touchSettings = TouchSettings.Default;
         private DigitizerSpecifications _touchDigitizer = new();
         private bool _initialized = false;
+        private int _lastTouchID = -1;
         private Vector2 min, max;
         private Vector2 _lastPos;
 
@@ -157,6 +158,10 @@ namespace OTD.EnhancedOutputMode.Output
                     _lastPos = _convertedReport.Position;
                     base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it
                 }
+                else if (_lastTouchID != TouchConvertedReport.CurrentFirstTouchID && TouchConvertedReport.CurrentFirstTouchID == -1)
+                    base.Read(_convertedReport);
+
+                _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
             }
             
             base.Read(deviceReport);
