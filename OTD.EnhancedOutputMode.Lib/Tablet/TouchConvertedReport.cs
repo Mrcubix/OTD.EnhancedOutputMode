@@ -9,7 +9,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
 {
     public class TouchConvertedReport : ITabletReport//, ITouchReport
     {
-        public static int CurrentFirstTouchID { get; set; } = -1;
+        public int CurrentFirstTouchID { get; set; } = -1;
 
         public byte[] Raw { get; set; }
         public Vector2 Position { get; set; }

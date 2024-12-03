@@ -18,32 +18,32 @@ namespace OTD.EnhancedOutputMode.Output
     [PluginName("Enhanced Relative Mode")]
     public class EnhancedRelativeOutputMode : RelativeOutputMode, IPointerProvider<IRelativePointer>
     {
-        private readonly ITabletReport _convertedReport = new TouchConvertedReport();
-        private readonly HPETDeltaStopwatch _touchStopwatch = new(true);
+        private readonly TouchConvertedReport _touchConvertedReport;
+        private readonly ITabletReport _convertedReport;
         private readonly HPETDeltaStopwatch _penStopwatch = new(true);
-        private TouchSettings _touchSettings = TouchSettings.Default;
         private bool _initialized = false;
         private bool _skipReport = false;
         private int _lastTouchID = -1;
         private Vector2? _lastTransformedTouchPos;
         private Vector2 _lastPos;
 
-        public Matrix3x2 TouchTransformationMatrix { get; protected set; }
-
 #pragma warning disable CS8618
+        public EnhancedRelativeOutputMode()
+        {
+            _touchConvertedReport = new TouchConvertedReport();
+            _convertedReport = _touchConvertedReport;
+        }
+#pragma warning restore CS8618
 
         [Resolved]
         public override IRelativePointer Pointer { set; get; }
 
-#pragma warning restore CS8618
+        public Matrix3x2 TouchTransformationMatrix { get; protected set; }
+
 
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
 
-        public TouchSettings TouchSettings
-        {
-            get => _touchSettings;
-            set => _touchSettings = value ?? TouchSettings.Default;
-        }
+        public TouchSettings TouchSettings { get; set; }
 
         #region Initialization
 
@@ -64,7 +64,7 @@ namespace OTD.EnhancedOutputMode.Output
 
             TouchTransformationMatrix = TransformationMatrix;
 
-            if (_touchSettings.MatchPenSensibilityInRelativeMode)
+            if (TouchSettings.MatchPenSensibilityInRelativeMode)
                 UpdateTouchTransformMatrix();
 
             _initialized = true;
@@ -74,8 +74,8 @@ namespace OTD.EnhancedOutputMode.Output
         {
             // Pen & Touch digitizer suffer from a difference in resolution, 
             // resulting in different speeds for the same sensitivity.
-            var XMultiplier = Tablet.Properties.Specifications.Digitizer.MaxX / _touchSettings.MaxX;
-            var YMultiplier = Tablet.Properties.Specifications.Digitizer.MaxY / _touchSettings.MaxY;
+            var XMultiplier = Tablet.Properties.Specifications.Digitizer.MaxX / TouchSettings.MaxX;
+            var YMultiplier = Tablet.Properties.Specifications.Digitizer.MaxY / TouchSettings.MaxY;
 
             // This should achieve about the same speed as the pen
             TouchTransformationMatrix = TransformationMatrix * Matrix3x2.CreateScale(XMultiplier, YMultiplier);
@@ -97,27 +97,26 @@ namespace OTD.EnhancedOutputMode.Output
         {
             if (deviceReport is ITouchReport touchReport)
             {
-                if (_touchSettings == null || !_touchSettings.IsTouchToggled) return;
+                if (TouchSettings == null || !TouchSettings.IsTouchToggled) return;
 
                 // Check if the pen was in range recently and skip report if it was
-                if (_touchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < _touchSettings.PenResetTimeSpan)
+                if (TouchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
                     return;
 
-                (_convertedReport as TouchConvertedReport)!.HandleReport(touchReport, _lastPos);
+                _touchConvertedReport.HandleReport(touchReport, _lastPos);
 
-                // The touch point that was moving the cursor changed, skip this report as it would cause a large delta
-                if (_lastTouchID != TouchConvertedReport.CurrentFirstTouchID)
+                if (_lastTouchID != _touchConvertedReport.CurrentFirstTouchID)
                 {
-                    if (TouchConvertedReport.CurrentFirstTouchID == -1)
+                    if (_touchConvertedReport.CurrentFirstTouchID == -1)
                         base.Read(_convertedReport);
-                    else
+                    else // The touch point that was moving the cursor changed, skip this report as it would cause a large delta
                     {
                         _lastPos = _convertedReport.Position;
                         _skipReport = true;
                     }
                 }
 
-                _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
+                _lastTouchID = _touchConvertedReport.CurrentFirstTouchID;
 
                 // Skip the report if the pressure is 0 or if the touch point changed
                 if (_convertedReport.Pressure != 0 && _skipReport == false)
@@ -132,7 +131,7 @@ namespace OTD.EnhancedOutputMode.Output
                 }
             }
             else if (deviceReport is IAbsolutePositionReport) // Restart the pen stopwatch when a pen report is received
-                if (_touchSettings.DisableWhenPenInRange)
+                if (TouchSettings.DisableWhenPenInRange)
                     _penStopwatch.Restart();
 
             base.Read(deviceReport);

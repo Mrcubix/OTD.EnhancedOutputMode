@@ -20,26 +20,30 @@ namespace OTD.EnhancedOutputMode.Output
     [PluginName("Enhanced Absolute Mode")]
     public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerProvider<IAbsolutePointer>
     {
-        private readonly ITabletReport _convertedReport = new TouchConvertedReport();
+        private readonly TouchConvertedReport _touchConvertedReport;
+        private readonly ITabletReport _convertedReport;
         private readonly HPETDeltaStopwatch _penStopwatch = new(true);
-        private TouchSettings _touchSettings = TouchSettings.Default;
         private DigitizerSpecifications _touchDigitizer = new();
         private bool _initialized = false;
         private int _lastTouchID = -1;
         private Vector2 min, max;
         private Vector2 _lastPos;
 
-        public Matrix3x2 TouchTransformationMatrix { get; protected set; }
-
 #pragma warning disable CS8618
+        public EnhancedAbsoluteOutputMode()
+        {
+            _touchConvertedReport = new TouchConvertedReport();
+            _convertedReport = _touchConvertedReport;
+        }
+#pragma warning restore CS8618
+
+        public Matrix3x2 TouchTransformationMatrix { get; protected set; }
 
         [Resolved]
         public override IAbsolutePointer Pointer { set; get; }
 
         [Resolved]
         public IDriver _driver { set; get; }
-
-#pragma warning restore CS8618
 
         public IList<IAuxFilter> AuxFilters { get; set; } = Array.Empty<IAuxFilter>();
 
@@ -57,8 +61,8 @@ namespace OTD.EnhancedOutputMode.Output
             // TODO, currently, TouchSettings isn't getting its values set early enough, we might want to load them from elsewhere
             if (touch != null)
                 maxes = new Vector2(touch.MaxX, touch.MaxY);
-            else if (_touchSettings.Maxes != Vector2.Zero) 
-                maxes = _touchSettings.Maxes;
+            else if (TouchSettings.Maxes != Vector2.Zero)
+                maxes = TouchSettings.Maxes;
             else
                 maxes = new Vector2(4095, 4095);
 
@@ -79,7 +83,7 @@ namespace OTD.EnhancedOutputMode.Output
             if (Elements == null)
                 return;
 
-            _touchSettings = Elements.OfType<TouchSettings>().FirstOrDefault() ?? TouchSettings.Default;
+            TouchSettings = Elements.OfType<TouchSettings>().FirstOrDefault() ?? TouchSettings.Default;
 
             // Initialize touch digitizer
             InitializeTouch(Tablet);
@@ -140,7 +144,7 @@ namespace OTD.EnhancedOutputMode.Output
                 Initialize();
 
             if (deviceReport is ITabletReport) // Restart the pen stopwatch when a pen report is received
-                if (_touchSettings.DisableWhenPenInRange)
+                if (TouchSettings.DisableWhenPenInRange)
                     _penStopwatch.Restart();
 
             if (deviceReport is ITouchReport touchReport)
@@ -148,22 +152,22 @@ namespace OTD.EnhancedOutputMode.Output
                 if (TouchSettings == null || !TouchSettings.IsTouchToggled) return;
 
                 // Check if the pen was in range recently and skip report if it was
-                if (_touchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < _touchSettings.PenResetTimeSpan)
+                if (TouchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
                     return;
 
-                (_convertedReport as TouchConvertedReport)!.HandleReport(touchReport, _lastPos);
+                _touchConvertedReport.HandleReport(touchReport, _lastPos);
 
                 if (_convertedReport.Pressure != 0)
                 {
                     _lastPos = _convertedReport.Position;
                     base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it
                 }
-                else if (_lastTouchID != TouchConvertedReport.CurrentFirstTouchID && TouchConvertedReport.CurrentFirstTouchID == -1)
+                else if (_lastTouchID != _touchConvertedReport.CurrentFirstTouchID && _touchConvertedReport.CurrentFirstTouchID == -1)
                     base.Read(_convertedReport);
 
-                _lastTouchID = TouchConvertedReport.CurrentFirstTouchID;
+                _lastTouchID = _touchConvertedReport.CurrentFirstTouchID;
             }
-            
+
             base.Read(deviceReport);
         }
 
