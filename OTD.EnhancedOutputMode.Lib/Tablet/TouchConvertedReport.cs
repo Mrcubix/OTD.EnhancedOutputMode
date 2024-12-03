@@ -11,10 +11,10 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
     {
         public int CurrentFirstTouchID { get; set; } = -1;
 
-        public byte[] Raw { get; set; }
+        public byte[] Raw { get; set; } = Array.Empty<byte>();
         public Vector2 Position { get; set; }
         public uint Pressure { get; set; }
-        public bool[] PenButtons { get; set; }
+        public bool[] PenButtons { get; set; } = Array.Empty<bool>();
         public bool InRange { get; set; }
 
         //public TouchPoint[] Touches { get; set; }
@@ -25,21 +25,12 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
             PenButtons = new bool[] {};
 
             if (report is ITouchReport touchreport)
-            {
-                //Touches = touchreport.Touches;
                 HandleReport(touchreport, lastPos);
-            }
             else if (report is ITabletReport tabletreport)
             {
                 Position = tabletreport.Position;
                 Pressure = tabletreport.Pressure;
                 PenButtons = tabletreport.PenButtons;
-
-                /*var touchPoint = new TouchPoint()
-                {
-                    Position = tabletreport.Position,
-                };
-                Touches = new TouchPoint[] { touchPoint };*/
 
                 Log.Write("OTD.EnhancedOutputMode", "Report is ITabletReport when ITouchReport is expected. \nWarning occured in OpenTabletDriver.EnhancedOutputMode.Tablet.TouchConvertedReport", LogLevel.Warning);
             }
@@ -48,17 +39,11 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
         public TouchConvertedReport(ITouchReport report, Vector2 lastPos)
         {
             Raw = report.Raw;
-            PenButtons = new bool[] {};
-            //Touches = report.Touches;
-            
             HandleReport(report, lastPos);
         }
 
         public TouchConvertedReport()
         {
-            Raw = Array.Empty<byte>();
-            PenButtons = Array.Empty<bool>();
-            //Touches = Array.Empty<TouchPoint>();
         }
 
         /// <summary>
@@ -72,8 +57,6 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
         public void HandleReport(ITouchReport touchReport, Vector2 lastPos)
         {
             TouchPoint firstTouch = null;
-
-            //Touches = touchReport.Touches;
 
             // Touch ID stays the same until the touch is released
             if (CurrentFirstTouchID != -1)
@@ -105,8 +88,6 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
                 Pressure = 0;
                 InRange = false;
             }
-
-            PenButtons = new bool[] { false };
         }
     }
 }
