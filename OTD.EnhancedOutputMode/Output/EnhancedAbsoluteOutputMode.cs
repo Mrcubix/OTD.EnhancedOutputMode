@@ -157,7 +157,7 @@ namespace OTD.EnhancedOutputMode.Output
 
                 _touchConvertedReport.HandleReport(touchReport, _lastPos);
 
-                if (_convertedReport.Pressure != 0)
+                if (_touchConvertedReport.InRange)
                 {
                     _lastPos = _convertedReport.Position;
                     base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it

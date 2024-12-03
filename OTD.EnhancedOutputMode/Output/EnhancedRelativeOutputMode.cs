@@ -119,7 +119,7 @@ namespace OTD.EnhancedOutputMode.Output
                 _lastTouchID = _touchConvertedReport.CurrentFirstTouchID;
 
                 // Skip the report if the pressure is 0 or if the touch point changed
-                if (_convertedReport.Pressure != 0 && _skipReport == false)
+                if (_touchConvertedReport.InRange && _skipReport == false)
                 {
                     _lastPos = _convertedReport.Position;
                     base.Read(_convertedReport); // We send another report instead of overwriting the touch report since plugins might rely on it
