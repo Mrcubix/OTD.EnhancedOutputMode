@@ -39,7 +39,7 @@ In which case you will need to set these values manually using the following ste
 ## What about Touch Gestures
 
 - For Native Gestures (Only recommended on Linux), see the [Native Gestures Plugin](https://github.com/Mrcubix/Native-Gestures/releases/tag/0.1.0)
-- For Touch Gestures, see the [Touch Gestures Plugin](https://github.com/Mrcubix/Touch-Gestures) (Available via the Plugin Manager)
+- For Non-Native Touch Gestures, see the [Touch Gestures Plugin](https://github.com/Mrcubix/Touch-Gestures) (Available via the Plugin Manager)
 
 ## Touch Supported Tablets (Tested)
 
