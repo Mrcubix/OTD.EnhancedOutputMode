@@ -9,7 +9,7 @@ using static OTD.EnhancedOutputMode.Constants.WindowsInkConstants;
 
 namespace OTD.EnhancedOutputMode.Handlers
 {
-    [PluginName("Windows Ink")]
+    [PluginName("Enhanced Windows Ink")]
     public unsafe partial class WindowsInkButtonHandler : IStateBinding
     {
         private VMultiInstance _instance = null!;

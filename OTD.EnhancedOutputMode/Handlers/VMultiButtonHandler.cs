@@ -9,7 +9,7 @@ using static OTD.EnhancedOutputMode.Constants.VMultiModeConstants;
 
 namespace OTD.EnhancedOutputMode.Handlers
 {
-    [PluginName("VMulti Mode")]
+    [PluginName("Enhanced VMulti Mode")]
     public class VMultiButtonHandler : IStateBinding
     {
         private VMultiInstance? _instance;
