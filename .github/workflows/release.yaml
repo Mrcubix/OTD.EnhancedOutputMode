@@ -19,7 +19,7 @@ jobs:
           - { branch: master, runtime: 5.0.x, otd_version: 0.5.x }
           - { branch: 0.6.x, runtime: 6.0.x, otd_version: 0.6.x }
 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     name: Generate Release
     env:
       TAG: ${{ github.event.inputs.tag }}
