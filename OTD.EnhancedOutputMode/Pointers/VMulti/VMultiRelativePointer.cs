@@ -9,10 +9,10 @@ using static OTD.EnhancedOutputMode.Constants.VMultiModeConstants;
 
 namespace OTD.EnhancedOutputMode.Pointers.VMulti
 {
-    public unsafe class VMultiRelativePointer : IRelativePointer, ISynchronousPointer
+    public unsafe class VMultiRelativePointer : VMultiBasePointer, IRelativePointer
     {
         private readonly RelativeInputReport* _rawPointer;
-        private readonly VMultiInstance<RelativeInputReport> _instance;
+        private readonly VMultiInstance<RelativeInputReport> _relativeInstance;
         private Vector2 _error;
         private Vector2 _delta;
         private bool _dirty;
@@ -20,8 +20,9 @@ namespace OTD.EnhancedOutputMode.Pointers.VMulti
         public VMultiRelativePointer(TabletReference tabletReference)
         {
             var sharedStore = SharedStore.GetStore(tabletReference, STORE_KEY);
-            _instance = sharedStore.GetOrUpdate(REL_INSTANCE, createInstance, out var updated);
-            _rawPointer = _instance.Pointer;
+            _relativeInstance = sharedStore.GetOrUpdate(REL_INSTANCE, createInstance, out var updated);
+            Instance = _relativeInstance;
+            _rawPointer = _relativeInstance.Pointer;
 
             sharedStore.SetOrAdd(MODE, REL_INSTANCE);
 
@@ -39,13 +40,9 @@ namespace OTD.EnhancedOutputMode.Pointers.VMulti
             _delta = delta;
         }
 
-        public void Reset()
+        public override void Flush()
         {
-        }
-
-        public void Flush()
-        {
-            if (_dirty && _instance is not null)
+            if (_dirty && Instance is not null)
             {
                 _dirty = false;
                 Send(_delta);
@@ -60,14 +57,14 @@ namespace OTD.EnhancedOutputMode.Pointers.VMulti
                 var partialDelta = new Vector2(Math.Clamp(remaining.X, -127, 127), Math.Clamp(remaining.Y, -127, 127));
                 _rawPointer->X = (byte)partialDelta.X;
                 _rawPointer->Y = (byte)partialDelta.Y;
-                _instance.Write();
+                Instance!.Write();
                 remaining -= partialDelta;
             }
 
             _error = new Vector2(remaining.X % 1, remaining.Y % 1);
             _rawPointer->X = (byte)remaining.X;
             _rawPointer->Y = (byte)remaining.Y;
-            _instance.Write();
+            Instance!.Write();
         }
     }
 }
