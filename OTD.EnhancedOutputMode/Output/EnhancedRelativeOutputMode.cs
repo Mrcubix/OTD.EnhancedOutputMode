@@ -16,7 +16,7 @@ using OTD.EnhancedOutputMode.Lib.Tablet;
 namespace OTD.EnhancedOutputMode.Output
 {
     [PluginName("Enhanced Relative Mode")]
-    public class EnhancedRelativeOutputMode : RelativeOutputMode, IPointerProvider<IRelativePointer>
+    public class EnhancedRelativeOutputMode : RelativeOutputMode
     {
         private readonly TouchConvertedReport _touchConvertedReport;
         private readonly ITabletReport _convertedReport;

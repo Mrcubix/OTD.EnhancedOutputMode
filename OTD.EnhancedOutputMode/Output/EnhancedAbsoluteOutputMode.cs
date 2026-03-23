@@ -18,7 +18,7 @@ using OTD.EnhancedOutputMode.Lib.Tablet;
 namespace OTD.EnhancedOutputMode.Output
 {
     [PluginName("Enhanced Absolute Mode")]
-    public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode, IPointerProvider<IAbsolutePointer>
+    public class EnhancedAbsoluteOutputMode : AbsoluteOutputMode
     {
         private readonly TouchConvertedReport _touchConvertedReport;
         private readonly ITabletReport _convertedReport;
