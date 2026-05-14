@@ -46,6 +46,10 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
         {
         }
 
+        [Obsolete("Use HandleReport(ITouchReport, Vector2, uint) instead")]
+        public void HandleReport(ITouchReport touchReport, Vector2 lastPos)
+            => HandleReport(touchReport, lastPos, 1024);
+
         /// <summary>
         ///   Handles the touch report and sets the position accordingly.
         /// </summary>
@@ -54,7 +58,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
         /// <remarks>
         ///   This method works without issues in 0.5, however, further handling is required in 0.6 as a large delta is being caused by something.
         /// </remarks>
-        public void HandleReport(ITouchReport touchReport, Vector2 lastPos)
+        public void HandleReport(ITouchReport touchReport, Vector2 lastPos, uint maxPressure = 1024)
         {
             TouchPoint firstTouch = null;
 
@@ -79,7 +83,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
             if (firstTouch != null)
             {
                 Position = firstTouch.Position;
-                Pressure = 1;
+                Pressure = maxPressure;
                 InRange = true;
             }
             else

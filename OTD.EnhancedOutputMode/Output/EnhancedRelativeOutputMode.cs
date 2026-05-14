@@ -23,6 +23,7 @@ namespace OTD.EnhancedOutputMode.Output
         private readonly HPETDeltaStopwatch _penStopwatch = new(true);
         private bool _initialized = false;
         private bool _skipReport = false;
+        private uint _maxPressure = 1024;
         private int _lastTouchID = -1;
         private Vector2? _lastTransformedTouchPos;
         private Vector2 _lastPos;
@@ -45,6 +46,16 @@ namespace OTD.EnhancedOutputMode.Output
 
         public TouchSettings TouchSettings { get; set; }
 
+        public override TabletReference Tablet
+        {
+            get => base.Tablet;
+            set
+            {
+                _maxPressure = Tablet?.Properties.Specifications.Pen?.MaxPressure ?? 1024;
+                base.Tablet = value;
+            }
+        }
+
         #region Initialization
 
         public void Initialize()
@@ -66,6 +77,8 @@ namespace OTD.EnhancedOutputMode.Output
 
             if (TouchSettings.MatchPenSensibilityInRelativeMode)
                 UpdateTouchTransformMatrix();
+
+            _maxPressure = TouchSettings.DisablePressureEmulation ? 0 : Tablet.Properties.Specifications.Pen?.MaxPressure ?? 1024;
 
             _initialized = true;
         }
@@ -103,7 +116,11 @@ namespace OTD.EnhancedOutputMode.Output
                 if (TouchSettings.DisableWhenPenInRange && _penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
                     return;
 
-                _touchConvertedReport.HandleReport(touchReport, _lastPos);
+                _touchConvertedReport.HandleReport(touchReport, _lastPos, _maxPressure);
+
+                // Cancel pressure on first report to avoid sudden panning
+                if (TouchSettings.DisablePressureEmulation == false && _lastTouchID == -1 && _touchConvertedReport.CurrentFirstTouchID != -1)
+                    _convertedReport.Pressure = 0;
 
                 if (_lastTouchID != _touchConvertedReport.CurrentFirstTouchID)
                 {
