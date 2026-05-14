@@ -58,6 +58,13 @@ namespace OTD.EnhancedOutputMode.Lib.Tools
                  "When Enabled, touch will be disabled when the pen is in range.")]
         public bool DisableWhenPenInRange { get; set; }
 
+        [BooleanProperty("Do not Emulate Pressure", ""),
+         DefaultPropertyValue(false),
+         ToolTip("OTD.EnhancedOutputMode:\n\n" +
+                 "Touching the surface will result in no pressure being reported. \n" +
+                 "If you don't want the touch to trigger the tip binding, tick this option.")]
+        public bool DisablePressureEmulation { get; set; }
+
         [Property("Pen in Range Reset Time"),
          DefaultPropertyValue(100),
          Unit("ms"),

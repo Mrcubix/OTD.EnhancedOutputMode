@@ -1,3 +1,4 @@
+using System;
 using System.Numerics;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Tablet;
@@ -23,7 +24,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
 
             if (report is ITouchReport touchreport)
             {
-                HandleReport(touchreport, lastPos);
+                HandleReport(touchreport, lastPos, 0);
             }
             else if (report is ITabletReport tabletreport)
             {
@@ -39,15 +40,19 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
             Raw = report.Raw;
             ReportID = 1;
             
-            HandleReport(report, lastPos);
+            HandleReport(report, lastPos, 0);
         }
 
         public TouchConvertedReport()
         {
             ReportID = 1;
         }
-
+        
+        [Obsolete("Use HandleReport(ITouchReport, Vector2, uint) instead")]
         public void HandleReport(ITouchReport touchReport, Vector2 lastPos)
+            => HandleReport(touchReport, lastPos, 1024);
+
+        public void HandleReport(ITouchReport touchReport, Vector2 lastPos, uint maxPressure = 1024)
         {
             TouchPoint firstTouch = null;
 
@@ -76,7 +81,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
             if (firstTouch != null)
             {
                 Position = firstTouch.Position;
-                Pressure = 1;
+                Pressure = maxPressure;
                 ReportID = 1;
             }
             else
@@ -86,7 +91,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
                 ReportID = 0;
             }
 
-            PenButtons = new bool[] {false};
+            PenButtons = new bool[] { false };
         }
     }
 }

@@ -19,11 +19,13 @@ namespace OTD.EnhancedOutputMode.Output
     [PluginName("Enhanced Relative Mode")]
     public class EnhancedRelativeOutputMode : RelativeOutputMode, IPointerOutputMode<IRelativePointer>
     {
+        private readonly TouchConvertedReport _touchConvertedReport = new TouchConvertedReport();
         private IList<IFilter> _filters, preFilters, postFilters;
-        private ITabletReport _convertedReport = new TouchConvertedReport();
+        private ITabletReport _convertedReport;
         private HPETDeltaStopwatch _Touchstopwatch = new(true);
         private HPETDeltaStopwatch _penStopwatch = new(true);
         private bool _firstReport = true;
+        private uint _maxPressure = 1024;
         private int _lastTouchID = -1;
         private Vector2 _lastTransformedPos;
         private Vector2 _lastPos;
@@ -63,6 +65,9 @@ namespace OTD.EnhancedOutputMode.Output
             // Someone asked for a feature to match the pen's speed in relative mode
             if (TouchSettings.MatchPenSensibilityInRelativeMode)
                 UpdateTouchTransformMatrix();
+
+            _convertedReport = _touchConvertedReport;
+            _maxPressure = Tablet?.Digitizer?.MaxPressure ?? 1024;
 
             // we don't want to initialize again
             _firstReport = false;
@@ -145,11 +150,18 @@ namespace OTD.EnhancedOutputMode.Output
                 if (_penStopwatch.Elapsed < TouchSettings.PenResetTimeSpan)
                     return false;
 
-            (_convertedReport as TouchConvertedReport).HandleReport(touchReport, _lastPos);
+            _touchConvertedReport.HandleReport(touchReport, _lastPos, _maxPressure);
 
             if (ShouldReport(report, ref _convertedReport))
             {
                 _lastPos = _convertedReport.Position;
+                
+                // Cancel pressure on first report to avoid sudden panning
+                if (TouchSettings.DisablePressureEmulation == false && _lastTouchID == -1 && TouchConvertedReport.CurrentFirstTouchID != -1)
+                    _touchConvertedReport.Pressure = 0;
+
+                if (Pointer is IVirtualTablet pressureHandler)
+                    pressureHandler.SetPressure((float)_convertedReport.Pressure / (float)Tablet.Digitizer.MaxPressure);
 
                 if (TransposeTouch(_convertedReport) is Vector2 pos && _lastTouchID == TouchConvertedReport.CurrentFirstTouchID)
                     Pointer.Translate(pos);
