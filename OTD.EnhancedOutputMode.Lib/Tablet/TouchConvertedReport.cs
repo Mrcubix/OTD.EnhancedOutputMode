@@ -25,7 +25,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
             PenButtons = new bool[] {};
 
             if (report is ITouchReport touchreport)
-                HandleReport(touchreport, lastPos);
+                HandleReport(touchreport, lastPos, 0);
             else if (report is ITabletReport tabletreport)
             {
                 Position = tabletreport.Position;
@@ -39,7 +39,7 @@ namespace OTD.EnhancedOutputMode.Lib.Tablet
         public TouchConvertedReport(ITouchReport report, Vector2 lastPos)
         {
             Raw = report.Raw;
-            HandleReport(report, lastPos);
+            HandleReport(report, lastPos, 0);
         }
 
         public TouchConvertedReport()
