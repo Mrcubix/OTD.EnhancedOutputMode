@@ -14,6 +14,9 @@ namespace OTD.EnhancedOutputMode.Handlers
     {
         private VMultiInstance? _instance;
 
+        private string? _button = "Left";
+        private int _finalButton;
+
         public static Dictionary<string, int> Bindings { get; } = new()
         {
             { "Left", 1 },
@@ -24,7 +27,24 @@ namespace OTD.EnhancedOutputMode.Handlers
         public static string[] ValidButtons { get; } = Bindings.Keys.ToArray();
 
         [Property("Button"), PropertyValidated(nameof(ValidButtons))]
-        public string? Button { get; set; }
+        public string? Button
+        {
+            set
+            {
+                _button = value;
+                
+                Bindings.TryGetValue(value!, out _finalButton);
+
+                // Fallback to Left if an invalid button is selected
+                if (_finalButton == 0) 
+                {
+                    _finalButton = 1;
+                    Log.Write("Enhanced VMulti Mode", $"Invalid value '{value}' for Button property. Falling back to 'Left' instead.", LogLevel.Warning);
+                }
+            }
+            get => _button;
+        }
+        
 
         [TabletReference]
         public TabletReference Reference { set => Initialize(value); }
@@ -50,7 +70,7 @@ namespace OTD.EnhancedOutputMode.Handlers
             if (_instance == null)
                 return;
 
-            _instance.EnableButtonBit(Bindings[Button!]);
+            _instance.EnableButtonBit(_finalButton);
             _instance.Write();
         }
 
@@ -59,7 +79,7 @@ namespace OTD.EnhancedOutputMode.Handlers
             if (_instance == null)
                 return;
 
-            _instance.DisableButtonBit(Bindings[Button!]);
+            _instance.DisableButtonBit(_finalButton);
             _instance.Write();
         }
     }
