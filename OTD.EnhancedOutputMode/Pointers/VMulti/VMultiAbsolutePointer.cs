@@ -9,7 +9,7 @@ using static OTD.EnhancedOutputMode.Constants.VMultiModeConstants;
 
 namespace OTD.EnhancedOutputMode.Pointers.VMulti
 {
-    public unsafe class VMultiAbsolutePointer : IAbsolutePointer, ISynchronousPointer
+    public unsafe class VMultiAbsolutePointer : IAbsolutePointer, IMouseButtonHandler, ISynchronousPointer
     {
         private readonly AbsoluteInputReport* _rawPointer;
         private readonly VMultiInstance<AbsoluteInputReport> _instance;

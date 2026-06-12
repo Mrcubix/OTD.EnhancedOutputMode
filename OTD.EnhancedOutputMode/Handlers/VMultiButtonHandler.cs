@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
+using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using VoiDPlugins.Library.VMulti;
 using VoiDPlugins.Library.VoiD;
@@ -82,5 +83,72 @@ namespace OTD.EnhancedOutputMode.Handlers
             _instance.DisableButtonBit(_finalButton);
             _instance.Write();
         }
+
+        // Adaptive Binding Support
+        public static void Activate(PenAction action, VMultiInstance instance)
+        {
+            if (instance == null)
+                return;
+
+            if (GetCode(action) is { } code)
+            {
+                instance.EnableButtonBit(code);
+                instance.Write();
+            }
+        }
+
+        public static void MouseUp(MouseButton button, VMultiInstance? Instance)
+        {
+            if (Instance == null)
+                return;
+
+            if (GetCode(button) is { } code)
+            {
+                Instance.EnableButtonBit(code);
+                Instance.Write();
+            }
+        }
+
+        public static void Deactivate(PenAction action, VMultiInstance instance)
+        {
+            if (instance == null)
+                return;
+
+            if (GetCode(action) is { } code)
+            {
+                instance.DisableButtonBit(code);
+                instance.Write();
+            }
+        }
+
+        public static void MouseDown(MouseButton button, VMultiInstance? instance)
+        {
+            if (instance == null)
+                return;
+
+            if (GetCode(button) is { } code)
+            {
+                instance.DisableButtonBit(code);
+                instance.Write();
+            }
+        }
+
+        private static int? GetCode(PenAction button) => button switch
+        {
+            PenAction.Tip => Bindings["Left"],
+            PenAction.Eraser => Bindings["Left"],
+            PenAction.BarrelButton1 => Bindings["Right"],
+            PenAction.BarrelButton2 => Bindings["Middle"],
+            PenAction.BarrelButton3 => null,
+            _ => null,
+        };
+
+        private static int? GetCode(MouseButton button) => button switch
+        {
+            MouseButton.Left => Bindings["Left"],
+            MouseButton.Middle => Bindings["Middle"],
+            MouseButton.Right => Bindings["Right"],
+            _ => null,
+        };
     }
 }
