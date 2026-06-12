@@ -3,7 +3,7 @@
 	url = https://github.com/OpenTabletDriver/OpenTabletDriver.git
 [submodule ".modules/VoiDPlugins"]
 	path = .modules/VoiDPlugins
-	url = https://github.com/X9VoiD/VoiDPlugins.git
+	url = https://github.com/Kuuuube/VoiDPlugins.git
 [submodule ".modules/HIDSharpCore"]
 	path = .modules/HIDSharpCore
 	url = https://github.com/InfinityGhost/HIDSharpCore.git
