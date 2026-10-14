@@ -8,10 +8,10 @@ using OpenTabletDriver.Plugin.Tablet;
 using OTD.EnhancedOutputMode.Output;
 using OTD.EnhancedOutputMode.Pointers.VMulti;
 
-namespace VoiDPlugins.OutputMode
+namespace OTD.EnhancedOutputMode.Output
 {
     [PluginName("Enhanced VMulti Absolute Mode"), SupportedPlatform(PluginPlatform.Windows)]
-    public class VMultiAbsoluteMode : EnhancedAbsoluteOutputMode
+    public class EnhancedVMultiAbsoluteMode : EnhancedAbsoluteOutputMode
     {
         private VMultiAbsolutePointer? _pointer;
         private IVirtualScreen? _virtualScreen;
