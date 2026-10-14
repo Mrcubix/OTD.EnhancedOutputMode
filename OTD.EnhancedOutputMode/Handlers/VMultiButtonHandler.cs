@@ -40,7 +40,7 @@ namespace OTD.EnhancedOutputMode.Handlers
                 if (_finalButton == 0) 
                 {
                     _finalButton = 1;
-                    Log.Write("Enhanced VMulti Mode", $"Invalid value '{value}' for Button property. Falling back to 'Left' instead.", LogLevel.Warning);
+                    Log.Write("Enhanced VMulti Bindings", $"Invalid value '{value}' for Button property. Falling back to 'Left' instead.", LogLevel.Warning);
                 }
             }
             get => _button;
@@ -61,7 +61,7 @@ namespace OTD.EnhancedOutputMode.Handlers
             catch
             {
                 Log.Write("Enhanced VMulti Bindings",
-                          "VMulti bindings are being used without an active Enhanced VMulti Output Mode.",
+                          "Enhanced VMulti Bindings are being used without an active Enhanced VMulti Output Mode.",
                           LogLevel.Error);
             }
         }
