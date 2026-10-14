@@ -1,6 +1,7 @@
+using System.Collections.Generic;
+using System.Linq;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
-using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OTD.EnhancedOutputMode.Enums;
 using VoiDPlugins.Library.VMulti;
@@ -15,17 +16,36 @@ namespace OTD.EnhancedOutputMode.Handlers
     {
         private VMultiInstance _instance = null!;
         private SharedStore _sharedStore = null!;
+        private string? _button = "Pen Tip";
+        private WinInkButtonBindings _finalButton;
 
-        public static string[] ValidButtons { get; } = new string[]
+        public static Dictionary<string, WinInkButtonBindings> Bindings { get; } = new()
         {
-            "Pen Tip",
-            "Pen Button",
-            "Eraser (Toggle)",
-            "Eraser (Hold)"
+            { "Pen Tip", WinInkButtonBindings.PenTip },
+            { "Pen Button", WinInkButtonBindings.PenButton },
+            { "Eraser (Toggle)", WinInkButtonBindings.EraserToggle },
+            { "Eraser (Hold)", WinInkButtonBindings.EraserHold }
         };
 
+        public static string[] ValidButtons { get; } = Bindings.Keys.ToArray();
+
         [Property("Button"), PropertyValidated(nameof(ValidButtons))]
-        public string? Button { get; set; }
+        public string? Button
+        {
+            get => _button;
+            set
+            {
+                _button = value;
+                
+                Bindings.TryGetValue(value!, out _finalButton);
+
+                if (_finalButton == WinInkButtonBindings.None)
+                {
+                    _finalButton = WinInkButtonBindings.PenTip;
+                    Log.WriteNotify("Enhanced Windows Ink Bindings", $"Invalid value '{value}' for Button property. Falling back to 'Pen Tip' instead.", LogLevel.Error);
+                }
+            }
+        }
 
         [TabletReference]
         public TabletReference Reference { set => Initialize(value); }
@@ -40,7 +60,7 @@ namespace OTD.EnhancedOutputMode.Handlers
             catch
             {
                 Log.WriteNotify("Enhanced Windows Ink Bindings",
-                                "Windows Ink bindings are being used without an active Enhanced Windows Ink Output Mode.",
+                                "Enhanced Windows Ink Bindings are being used without an active Enhanced Windows Ink Output Mode.",
                                 LogLevel.Error);
             }
         }
@@ -51,23 +71,23 @@ namespace OTD.EnhancedOutputMode.Handlers
                 return;
 
             var eraserState = _sharedStore.Get<bool>(ERASER_STATE);
-            switch (Button)
+            switch (_finalButton)
             {
-                case "Pen Tip":
+                case WinInkButtonBindings.PenTip:
                     _sharedStore.Set(TIP_PRESSED, true);
                     _instance.EnableButtonBit((int)(eraserState ? WindowsInkButtonFlags.Eraser : WindowsInkButtonFlags.Press));
                     break;
 
-                case "Pen Button":
+                case WinInkButtonBindings.PenButton:
                     _instance.EnableButtonBit((int)WindowsInkButtonFlags.Barrel);
                     break;
 
-                case "Eraser (Toggle)":
+                case WinInkButtonBindings.EraserToggle:
                     _sharedStore.Set(MANUAL_ERASER, !eraserState);
                     EraserStateTransition(_sharedStore, _instance, !eraserState);
                     break;
 
-                case "Eraser (Hold)":
+                case WinInkButtonBindings.EraserHold:
                     _sharedStore.Set(MANUAL_ERASER, true);
                     EraserStateTransition(_sharedStore, _instance, true);
                     break;
@@ -80,18 +100,18 @@ namespace OTD.EnhancedOutputMode.Handlers
             if (_instance == null)
                 return;
 
-            switch (Button)
+            switch (_finalButton)
             {
-                case "Pen Tip":
+                case WinInkButtonBindings.PenTip:
                     _sharedStore.Set(TIP_PRESSED, false);
                     _instance.DisableButtonBit((int)(WindowsInkButtonFlags.Press | WindowsInkButtonFlags.Eraser));
                     break;
 
-                case "Pen Button":
+                case WinInkButtonBindings.PenButton:
                     _instance.DisableButtonBit((int)WindowsInkButtonFlags.Barrel);
                     break;
 
-                case "Eraser (Hold)":
+                case WinInkButtonBindings.EraserHold:
                     _sharedStore.Set(MANUAL_ERASER, false);
                     EraserStateTransition(_sharedStore, _instance, false);
                     break;
