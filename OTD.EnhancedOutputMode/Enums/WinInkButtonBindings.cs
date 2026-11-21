@@ -4,6 +4,7 @@ namespace OTD.EnhancedOutputMode.Enums
     {
         None,
         PenTip,
+        EraserTip,
         PenButton,
         EraserToggle,
         EraserHold
