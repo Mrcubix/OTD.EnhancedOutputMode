@@ -22,6 +22,7 @@ namespace OTD.EnhancedOutputMode.Handlers
         public static Dictionary<string, WinInkButtonBindings> Bindings { get; } = new()
         {
             { "Pen Tip", WinInkButtonBindings.PenTip },
+            { "Eraser Tip", WinInkButtonBindings.EraserTip },
             { "Pen Button", WinInkButtonBindings.PenButton },
             { "Eraser (Toggle)", WinInkButtonBindings.EraserToggle },
             { "Eraser (Hold)", WinInkButtonBindings.EraserHold }
@@ -74,6 +75,7 @@ namespace OTD.EnhancedOutputMode.Handlers
             switch (_finalButton)
             {
                 case WinInkButtonBindings.PenTip:
+                case WinInkButtonBindings.EraserTip:
                     _sharedStore.Set(TIP_PRESSED, true);
                     _instance.EnableButtonBit((int)(eraserState ? WindowsInkButtonFlags.Eraser : WindowsInkButtonFlags.Press));
                     break;
