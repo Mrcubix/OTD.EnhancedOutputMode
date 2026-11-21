@@ -7,12 +7,14 @@ using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OTD.EnhancedOutputMode.Output;
 using OTD.EnhancedOutputMode.Pointers.VMulti;
+using VoiDPlugins.OutputMode;
 
-namespace VoiDPlugins.OutputMode
+namespace OTD.EnhancedOutputMode.Output
 {
     [PluginName("Enhanced VMulti Absolute Mode"), SupportedPlatform(PluginPlatform.Windows)]
-    public class VMultiAbsoluteMode : EnhancedAbsoluteOutputMode
+    public class EnhancedVMultiAbsoluteMode : EnhancedAbsoluteOutputMode
     {
+        private readonly DummyAbsolutePointer _dummyPointer = new();
         private VMultiAbsolutePointer? _pointer;
         private IVirtualScreen? _virtualScreen;
 
@@ -34,7 +36,16 @@ namespace VoiDPlugins.OutputMode
 
         public override IAbsolutePointer Pointer
         {
-            get => _pointer!;
+            get
+            {
+                if (_pointer == null)
+                {
+                    Log.Write("Enhanced Output Mode", "Pointer not available, falling back to dummy pointer for now...");
+                    return _dummyPointer;
+                }
+                else
+                    return _pointer;
+            }
             set { }
         }
     }

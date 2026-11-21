@@ -2,6 +2,7 @@ using System.Numerics;
 using OpenTabletDriver.Plugin.Platform.Display;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
+using OTD.EnhancedOutputMode.Handlers;
 using VoiDPlugins.Library.VMulti;
 using VoiDPlugins.Library.VMulti.Device;
 using VoiDPlugins.Library.VoiD;
@@ -9,7 +10,7 @@ using static OTD.EnhancedOutputMode.Constants.VMultiModeConstants;
 
 namespace OTD.EnhancedOutputMode.Pointers.VMulti
 {
-    public unsafe class VMultiAbsolutePointer : IAbsolutePointer, ISynchronousPointer
+    public unsafe class VMultiAbsolutePointer : IAbsolutePointer, IMouseButtonHandler, IPenActionHandler, ISynchronousPointer
     {
         private readonly AbsoluteInputReport* _rawPointer;
         private readonly VMultiInstance<AbsoluteInputReport> _instance;
@@ -34,15 +35,17 @@ namespace OTD.EnhancedOutputMode.Pointers.VMulti
 
         public void SetPosition(Vector2 pos)
         {
-            if (pos == _prev)
-                return;
-
             pos *= _conversionFactor;
             _rawPointer->X = (ushort)pos.X;
             _rawPointer->Y = (ushort)pos.Y;
             _dirty = true;
             _prev = pos;
         }
+
+        public void Activate(PenAction action) => VMultiButtonHandler.Activate(action, _instance);
+        public void Deactivate(PenAction action) => VMultiButtonHandler.Deactivate(action, _instance);
+        public void MouseDown(MouseButton action) => VMultiButtonHandler.MouseDown(action, _instance);
+        public void MouseUp(MouseButton action) => VMultiButtonHandler.MouseUp(action, _instance);
 
         public void Reset()
         {

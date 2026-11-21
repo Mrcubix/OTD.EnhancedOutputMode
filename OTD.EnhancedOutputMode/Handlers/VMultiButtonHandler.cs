@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenTabletDriver.Plugin;
 using OpenTabletDriver.Plugin.Attributes;
+using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using VoiDPlugins.Library.VMulti;
 using VoiDPlugins.Library.VoiD;
@@ -14,6 +15,9 @@ namespace OTD.EnhancedOutputMode.Handlers
     {
         private VMultiInstance? _instance;
 
+        private string? _button = "Left";
+        private int _finalButton;
+
         public static Dictionary<string, int> Bindings { get; } = new()
         {
             { "Left", 1 },
@@ -24,7 +28,24 @@ namespace OTD.EnhancedOutputMode.Handlers
         public static string[] ValidButtons { get; } = Bindings.Keys.ToArray();
 
         [Property("Button"), PropertyValidated(nameof(ValidButtons))]
-        public string? Button { get; set; }
+        public string? Button
+        {
+            set
+            {
+                _button = value;
+                
+                Bindings.TryGetValue(value!, out _finalButton);
+
+                // Fallback to Left if an invalid button is selected
+                if (_finalButton == 0) 
+                {
+                    _finalButton = 1;
+                    Log.Write("Enhanced VMulti Bindings", $"Invalid value '{value}' for Button property. Falling back to 'Left' instead.", LogLevel.Warning);
+                }
+            }
+            get => _button;
+        }
+        
 
         [TabletReference]
         public TabletReference Reference { set => Initialize(value); }
@@ -40,7 +61,7 @@ namespace OTD.EnhancedOutputMode.Handlers
             catch
             {
                 Log.Write("Enhanced VMulti Bindings",
-                          "VMulti bindings are being used without an active Enhanced VMulti Output Mode.",
+                          "Enhanced VMulti Bindings are being used without an active Enhanced VMulti Output Mode.",
                           LogLevel.Error);
             }
         }
@@ -50,7 +71,7 @@ namespace OTD.EnhancedOutputMode.Handlers
             if (_instance == null)
                 return;
 
-            _instance.EnableButtonBit(Bindings[Button!]);
+            _instance.EnableButtonBit(_finalButton);
             _instance.Write();
         }
 
@@ -59,8 +80,75 @@ namespace OTD.EnhancedOutputMode.Handlers
             if (_instance == null)
                 return;
 
-            _instance.DisableButtonBit(Bindings[Button!]);
+            _instance.DisableButtonBit(_finalButton);
             _instance.Write();
         }
+
+        // Adaptive Binding Support
+        public static void Activate(PenAction action, VMultiInstance instance)
+        {
+            if (instance == null)
+                return;
+
+            if (GetCode(action) is { } code)
+            {
+                instance.EnableButtonBit(code);
+                instance.Write();
+            }
+        }
+
+        public static void MouseUp(MouseButton button, VMultiInstance? Instance)
+        {
+            if (Instance == null)
+                return;
+
+            if (GetCode(button) is { } code)
+            {
+                Instance.EnableButtonBit(code);
+                Instance.Write();
+            }
+        }
+
+        public static void Deactivate(PenAction action, VMultiInstance instance)
+        {
+            if (instance == null)
+                return;
+
+            if (GetCode(action) is { } code)
+            {
+                instance.DisableButtonBit(code);
+                instance.Write();
+            }
+        }
+
+        public static void MouseDown(MouseButton button, VMultiInstance? instance)
+        {
+            if (instance == null)
+                return;
+
+            if (GetCode(button) is { } code)
+            {
+                instance.DisableButtonBit(code);
+                instance.Write();
+            }
+        }
+
+        private static int? GetCode(PenAction button) => button switch
+        {
+            PenAction.Tip => Bindings["Left"],
+            PenAction.Eraser => Bindings["Left"],
+            PenAction.BarrelButton1 => Bindings["Right"],
+            PenAction.BarrelButton2 => Bindings["Middle"],
+            PenAction.BarrelButton3 => null,
+            _ => null,
+        };
+
+        private static int? GetCode(MouseButton button) => button switch
+        {
+            MouseButton.Left => Bindings["Left"],
+            MouseButton.Middle => Bindings["Middle"],
+            MouseButton.Right => Bindings["Right"],
+            _ => null,
+        };
     }
 }

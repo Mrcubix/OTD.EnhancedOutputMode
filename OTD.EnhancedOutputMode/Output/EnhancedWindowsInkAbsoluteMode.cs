@@ -6,12 +6,14 @@ using OpenTabletDriver.Plugin.Platform.Display;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
 using OTD.EnhancedOutputMode.Pointers.WindowsInk;
+using VoiDPlugins.OutputMode;
 
 namespace OTD.EnhancedOutputMode.Output
 {
     [PluginName("Enhanced Windows Ink Absolute Mode"), SupportedPlatform(PluginPlatform.Windows)]
     public class EnhancedWindowsInkAbsoluteMode : EnhancedAbsoluteOutputMode
     {
+        private readonly DummyAbsolutePointer _dummyPointer = new();
         private WindowsInkAbsolutePointer? _pointer;
         private IVirtualScreen? _virtualScreen;
 
@@ -45,7 +47,16 @@ namespace OTD.EnhancedOutputMode.Output
 
         public override IAbsolutePointer Pointer
         {
-            get => _pointer!;
+            get
+            {
+                if (_pointer == null)
+                {
+                    Log.Write("Enhanced Output Mode", "Pointer not available, falling back to dummy pointer for now...");
+                    return _dummyPointer;
+                }
+                else
+                    return _pointer;
+            }
             set { }
         }
     }

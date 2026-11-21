@@ -20,9 +20,6 @@ namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
 
         public void SetPosition(Vector2 delta)
         {
-            if (delta == Vector2.Zero)
-                return;
-
             _currentPoint = Vector2.Clamp(_currentPoint + delta, Vector2.Zero, _maxPoint);
 
             SetInternalPosition(_currentPoint);

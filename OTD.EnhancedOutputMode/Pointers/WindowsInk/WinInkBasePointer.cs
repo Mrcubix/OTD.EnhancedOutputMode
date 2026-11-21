@@ -2,6 +2,7 @@ using System.Numerics;
 using OpenTabletDriver.Plugin.Platform.Display;
 using OpenTabletDriver.Plugin.Platform.Pointer;
 using OpenTabletDriver.Plugin.Tablet;
+using OTD.EnhancedOutputMode.Enums;
 using OTD.EnhancedOutputMode.Handlers;
 using VoiDPlugins.Library.VMulti;
 using VoiDPlugins.Library.VMulti.Device;
@@ -10,7 +11,7 @@ using static OTD.EnhancedOutputMode.Constants.WindowsInkConstants;
 
 namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
 {
-    public unsafe abstract class WinInkBasePointer : IPressureHandler, ITiltHandler, IEraserHandler, ISynchronousPointer
+    public unsafe abstract class WinInkBasePointer : IPressureHandler, ITiltHandler, IEraserHandler, IPenActionHandler, ISynchronousPointer
     {
         private readonly Vector2 _conversionFactor;
         private readonly IVirtualScreen _screen;
@@ -69,6 +70,33 @@ namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
             RawPointer->YTilt = (byte)tilt.Y;
         }
 
+        // Adaptive Binding Support
+        public void Activate(PenAction action)
+        {
+            if (GetCode(action) is { } code)
+            {
+                Instance.EnableButtonBit(code);
+
+                if (code == (int)WindowsInkButtonFlags.Press)
+                    SharedStore.Set(TIP_PRESSED, true);
+
+                Instance.Write();
+            }
+        }
+
+        public void Deactivate(PenAction action)
+        {
+            if (GetCode(action) is { } code)
+            {
+                Instance.DisableButtonBit(code);
+
+                if (code == (int)WindowsInkButtonFlags.Press)
+                    SharedStore.Set(TIP_PRESSED, false);
+
+                Instance.Write();
+            }
+        }
+
         public void Reset()
         {
             if (_osPointer is not null && !ForcedSync)
@@ -104,5 +132,15 @@ namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
         {
             _osPointer?.SetPosition(_internalPos);
         }
+
+        private static int? GetCode(PenAction action) => action switch
+        {
+            PenAction.Tip => (int)WindowsInkButtonFlags.Press,
+            PenAction.Eraser => (int)WindowsInkButtonFlags.Eraser,
+            PenAction.BarrelButton1 => (int)WindowsInkButtonFlags.Barrel,
+            PenAction.BarrelButton2 => (int)WindowsInkButtonFlags.Barrel,
+            PenAction.BarrelButton3 => (int)WindowsInkButtonFlags.Barrel,
+            _ => null
+        };
     }
 }
