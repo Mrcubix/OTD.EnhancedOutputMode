@@ -35,9 +35,6 @@ namespace OTD.EnhancedOutputMode.Pointers.VMulti
 
         public void SetPosition(Vector2 pos)
         {
-            if (pos == _prev)
-                return;
-
             pos *= _conversionFactor;
             _rawPointer->X = (ushort)pos.X;
             _rawPointer->Y = (ushort)pos.Y;

@@ -17,9 +17,6 @@ namespace OTD.EnhancedOutputMode.Pointers.WindowsInk
 
         public void SetPosition(Vector2 pos)
         {
-            if (pos == _prev)
-                return;
-
             SetInternalPosition(pos);
             Instance.EnableButtonBit((int)WindowsInkButtonFlags.InRange);
             pos = Convert(pos);

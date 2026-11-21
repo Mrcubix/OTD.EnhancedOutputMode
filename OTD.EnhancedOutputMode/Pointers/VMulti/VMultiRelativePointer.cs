@@ -34,8 +34,6 @@ namespace OTD.EnhancedOutputMode.Pointers.VMulti
 
         public void SetPosition(Vector2 delta)
         {
-            if (delta == Vector2.Zero)
-                return;
             _dirty = true;
             _delta = delta;
         }
